@@ -544,7 +544,6 @@ text(x = bp,
      labels = rbind(ok_notsent, fail_sent), 
      pos = 1)  
 #pos# Determines position of text to the top of the bar
-#So there are 237 such batteries with charge less than 80%
 #---------------------------------------------------------------------------#
 #Analysis Inference Two can be done with the fist ig
 
