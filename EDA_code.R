@@ -545,5 +545,5 @@ text(x = bp,
      pos = 1)  
 #pos# Determines position of text to the top of the bar
 #---------------------------------------------------------------------------#
-#Analysis Inference Two can be done with the fist ig
+#Analysis Inferences can be done with summaries
 
