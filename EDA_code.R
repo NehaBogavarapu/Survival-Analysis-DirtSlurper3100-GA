@@ -437,7 +437,8 @@ print(summary_table)
 cat("\n=== T-TEST: Usage Time by Pet Ownership ===\n")
 pet_usage_test <- t.test(Total.usage.time ~ Pets, data = data_eda)
 print(pet_usage_test)
-#-----------------------------------------------------------------------------------------#
+
+#------------------------------------------KM Estimator----------------------------------------------#
 #forthe dmy function
 library(lubridate)
 #for the analysing survival
