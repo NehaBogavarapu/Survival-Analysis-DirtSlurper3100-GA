@@ -8,7 +8,7 @@ library(tidyr)
 library(tidyverse)
 
 # Set path to CSV data file 
-file_path <- "C:/Users/20221564/OneDrive - TU Eindhoven/Data Science and Artificial Intelligence Masters/Survival Analysis/DirtSlurper3100.csv"
+file_path <- "D:\\TUE Study Material\\Q1\\Survival Analysis for Data Scientists\\GA_17\\DirtSlurper\\Survival-Analysis-DirtSlurper3100-GA\\DirtSlurper3100.csv"
 
 # Read data
 og_data <- read.table(file_path,
@@ -234,13 +234,13 @@ batterystatus <- data_eda$Battery.status
 impactsensor_status <- data_eda$Impact.status
 infraredsensor_status <- data_eda$IR.status
 
-battery_ok <- sum(batterystatus == 1, na.rm = TRUE)
-impactsensor_ok <- sum(impactsensor_status == 1, na.rm = TRUE)
-infraredsensor_ok <- sum(infraredsensor_status == 1, na.rm = TRUE)
+battery_ok <- sum(batterystatus == "OK", na.rm = TRUE)
+impactsensor_ok <- sum(impactsensor_status == "OK", na.rm = TRUE)
+infraredsensor_ok <- sum(infraredsensor_status == "OK", na.rm = TRUE)
 
-battery_fail <- sum(batterystatus == 0, na.rm = TRUE)
-impactsensor_fail <- sum(impactsensor_status == 0, na.rm = TRUE)
-infraredsensor_fail <- sum(infraredsensor_status == 0, na.rm = TRUE)
+battery_fail <- sum(batterystatus == "Damage", na.rm = TRUE)
+impactsensor_fail <- sum(impactsensor_status == "Damage", na.rm = TRUE)
+infraredsensor_fail <- sum(infraredsensor_status == "Damage", na.rm = TRUE)
 
 ok <- c(battery_ok, impactsensor_ok, infraredsensor_ok)
 fail <- c(battery_fail, impactsensor_fail, infraredsensor_fail)
@@ -255,7 +255,7 @@ barplot(rbind(ok, fail),
 legend("topright",
        legend = c("OK", "Damage"),
        fill = c("green", "orange"),
-       inset = c(-0.02, -0.02), bty = "n")  
+       inset = c(-0.07, -0.07), bty = "n")  
 # This implies that Battery is the most sensitive followed by Infrared and Impact Sensor
 
 # Relation between Average usage time and Failure of Battery, Impact Sensor, Infrared Sensor
@@ -271,7 +271,7 @@ ir_ok <- infraredsensor_mean["OK"]
 ir_damage <- infraredsensor_mean["Damage"]
 
 ok <- c(battery_ok, impactsensor_ok, infraredsensor_ok)
-damage <- c(battery_damage, impactsensor_damage, infraredsensor_damage)
+damage <- c(battery_damage, impact_damage, ir_damage)
 
 barplot(rbind(ok, damage),
         beside = TRUE,
@@ -280,7 +280,7 @@ barplot(rbind(ok, damage),
         main = "Status of Components",
         xlab = "Components of Vacuum",
         ylab = "Average Usage Time (hours)")
-legend("topright",
+legend("topleft",
        legend = c("OK", "Damage"),
        fill = c("purple", "cyan"),
        inset = c(-0.02, -0.02),
@@ -288,9 +288,9 @@ legend("topright",
 # Infrared Sensor fails when vacuum used less as opposed to battery and impact where more use corresponds to more failure
 
 # Relation between Pets and Failure of Battery, Impact Status, Infrared Sensor
-battery_fail <- tapply(batterystatus == 0, pets, sum, na.rm = TRUE)
-impactsensor_fail <- tapply(impactsensor_status == 0, pets, sum, na.rm = TRUE)
-infraredsensor_fail <- tapply(infraredsensor_status == 0, pets, sum, na.rm = TRUE)
+battery_fail <- tapply(batterystatus == "Damage", pets, sum, na.rm = TRUE)
+impactsensor_fail <- tapply(impactsensor_status == "Damage", pets, sum, na.rm = TRUE)
+infraredsensor_fail <- tapply(infraredsensor_status == "Damage", pets, sum, na.rm = TRUE)
 
 fail_matrix <- rbind(Battery = battery_fail,
                      Impact  = impactsensor_fail,
@@ -307,9 +307,9 @@ legend("topleft", legend = c("Battery", "Impact Sensor", "Infrared Sensor"),
 # When no pets IR fails; when pets Battery fails
 
 # Relation between Carpet Score and Failure of Battery, Impact Status, Infrared Sensor
-battery_fail <- tapply(batterystatus == 0, carpetscore, sum, na.rm = TRUE)
-impactsensor_fail <- tapply(impactsensor_status == 0, carpetscore, sum, na.rm = TRUE)
-infraredsensor_fail <- tapply(infraredsensor_status == 0, carpetscore, sum, na.rm = TRUE)
+battery_fail <- tapply(batterystatus == "Damage" , carpetscore, sum, na.rm = TRUE)
+impactsensor_fail <- tapply(impactsensor_status == "Damage", carpetscore, sum, na.rm = TRUE)
+infraredsensor_fail <- tapply(infraredsensor_status == "Damage", carpetscore, sum, na.rm = TRUE)
 
 fail_matrix <- rbind(Battery = battery_fail,
                      Impact  = impactsensor_fail,
@@ -437,3 +437,114 @@ print(summary_table)
 cat("\n=== T-TEST: Usage Time by Pet Ownership ===\n")
 pet_usage_test <- t.test(Total.usage.time ~ Pets, data = data_eda)
 print(pet_usage_test)
+#-----------------------------------------------------------------------------------------#
+#forthe dmy function
+library(lubridate)
+#for the analysing survival
+#library(survival) already
+#for pretty plotting of Survival Functions
+#library(survminer) already
+
+study_end <- dmy("31-12-2019")
+failuredate <- as.Date(data_eda$Failure.date,format="%d-%m-%Y")
+
+##Changing the convention i.e 1 for failure and 0 for censored
+#failuredate-reg=working time, if failure not given means vacuum working
+#so then study_end -reg=working time(handles ok values)
+# setting up parameters for Battery 
+time_battery <- ifelse(!is.na(failuredate) & batterystatus == "Damage",
+                       as.numeric(difftime(failuredate, reg, units="days")),
+                       as.numeric(difftime(study_end, reg, units="days")))
+event_battery <- ifelse(batterystatus == "Damage", 1, 0)
+
+# setting up parameters for Impact Sensor
+time_impactsensor <- ifelse(!is.na(failuredate) & impactsensor_status == "Damage",
+                            as.numeric(difftime(failuredate, reg, units="days")),
+                            as.numeric(difftime(study_end, reg, units="days")))
+event_impactsensor <- ifelse(impactsensor_status == "Damage", 1, 0)
+
+# setting up parameters for INFRARED Sensor
+time_infraredsensor <- ifelse(!is.na(failuredate) & infraredsensor_status == "Damage",
+                              as.numeric(difftime(failuredate, reg, units="days")),
+                              as.numeric(difftime(study_end, reg, units="days")))
+event_infraredsensor <- ifelse(infraredsensor_status == "Damage", 1, 0)
+
+# setting up parameters for analysing survival of Whole Vacuum (fails if ANY component fails) 
+event_vacuum <- ifelse((batterystatus == "Damage" |
+                          impactsensor_status == "Damage" |
+                          infraredsensor_status == "Damage"), 1, 0)
+
+time_vacuum <- ifelse(event_vacuum == 1 & !is.na(failuredate),
+                      as.numeric(difftime(failuredate, reg, units="days")),
+                      as.numeric(difftime(study_end, reg, units="days")))
+
+# Kaplan Mier Estimation
+km_battery <- survfit(Surv(time_battery, event_battery) ~ 1, data = data_eda)
+km_impactsensor  <- survfit(Surv(time_impactsensor, event_impactsensor) ~ 1, data = data_eda)
+km_infraredsensor   <- survfit(Surv(time_infraredsensor, event_infraredsensor) ~ 1, data = data_eda)
+km_vacuum  <- survfit(Surv(time_vacuum, event_vacuum) ~ 1)
+
+# KM Plots for all the components as well as the whole vacuum
+ggsurvplot(km_battery, data = data_eda, conf.int=TRUE, title="Battery Survival", xlab="Days", ylab="Survival Probability")
+ggsurvplot(km_impactsensor, data = data_eda, conf.int=TRUE, title="Impact Sensor Survival", xlab="Days", ylab="Survival Probability")
+ggsurvplot(km_infraredsensor, data = data_eda, conf.int=TRUE, title="Infrared Sensor Survival", xlab="Days", ylab="Survival Probability")
+ggsurvplot(km_vacuum, data = data_eda, conf.int=TRUE, title="Overall Vacuum Survival", xlab="Days", ylab="Survival Probability")
+
+# Survival probabilities, Error and Confidence Intervals  at 500, 1000, 1500 days
+#Max time is close to somewhere 1800 something 
+summary(km_battery, times=c(500,1000,1500))
+summary(km_impactsensor, times=c(500,1000,1500))
+summary(km_infraredsensor, times=c(500,1000,1500))
+summary(km_vacuum, times=c(500,1000,1500))
+
+
+#----------------------------------------------------------------------------#
+
+
+#Analysing Inference two(a)
+# setting up parameters for Battery that runs at most 2400 hours
+time_battery2400 <- ifelse(!is.na(failuredate) & totaltime<=2400 & batterystatus == "Damage" ,
+                           as.numeric(difftime(failuredate, reg, units="days")),
+                           as.numeric(difftime(study_end, reg, units="days")))
+event_battery2400 <- ifelse(batterystatus == "Damage", 1, 0)
+
+# Kaplan Mier Estimation
+km_battery2400 <- survfit(Surv(time_battery2400, event_battery2400) ~ 1, data = data_eda)
+
+# KM Plot for battery that runs less than 2400 hours
+ggsurvplot(km_battery2400, data = data_eda, conf.int=TRUE, title="Survival of Batteries that run <=2400 hours", xlab="Days", ylab="Survival Probability")
+
+# Survival probabilities, Error and Confidence Intervals  at 500, 1000, 1500 days
+summary(km_battery2400, times=c(500,1000,1500))
+
+#Analysing Inference two(b)
+#Battery that works for greater than 2400 hours sent for repair or not
+#Hypothesis that every time it fails sent for repair, and when OK it isnot sent for repair
+g2400batterysent <- ifelse(totaltime>2400 ,as.character(data_eda$Sent.for.repair),NA)
+g2400battery_ok=sum(g2400batterysent=="No",na.rm=TRUE)
+g2400battery_fail=sum(g2400batterysent=="Yes",na.rm=TRUE)
+
+ok_notsent <- c(g2400battery_ok)
+fail_sent <- c(g2400battery_fail)
+
+bp<-barplot(rbind(ok_notsent, fail_sent),
+            beside = TRUE,
+            col = c("blue", "orange"),
+            names.arg = c("Battery"),
+            main = "Repair status of Components",
+            xlab = "Components of Vacuum",
+            ylab = "Count")
+legend("topleft",
+       legend = c("Not Sent", "Sent"),
+       fill = c("blue", "orange"),
+       inset = c(-0.07, -0.07),bty = "n")  
+# Adding text on top of bars
+text(x = bp, 
+     y = rbind(ok_notsent, fail_sent), 
+     labels = rbind(ok_notsent, fail_sent), 
+     pos = 1)  
+#pos# Determines position of text to the top of the bar
+#So there are 237 such batteries with charge less than 80%
+#---------------------------------------------------------------------------#
+#Analysis Inference Two can be done with the fist ig
+
