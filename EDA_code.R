@@ -1,14 +1,15 @@
 # Load packages 
 library(survival) 
 library(survminer) 
-library(dplyr) 
-library(ggplot2)
 library(VIM)
-library(tidyr)
 library(tidyverse)
 library(lubridate)
 # Set path to CSV data file 
+<<<<<<< HEAD
 file_path <- "D:\\TUE Study Material\\Q1\\Survival Analysis for Data Scientists\\GA_17\\Survival-Analysis-DirtSlurper3100-GA\\DirtSlurper3100.csv"
+=======
+file_path <- "C:/Users/20221564/OneDrive - TU Eindhoven/Data Science and Artificial Intelligence Masters/Survival Analysis/DirtSlurper3100.csv"
+>>>>>>> ef799af9f0caa5e2a565884140e026c3404aec18
 
 # Read data
 og_data <- read.table(file_path,
@@ -46,7 +47,7 @@ ok_parts_but_failure_idx <- which(
 Sys.setlocale("LC_TIME", "C")  
 # (had to do this because dates with "Sep" were not being identified)
 
-data <- og_data %>%
+data_eda <- og_data %>%
   slice(-rows_to_drop) %>% # Drop the rows_to_drop
   mutate(
     # Format dates 
@@ -54,7 +55,7 @@ data <- og_data %>%
     Failure.date = as.Date(Failure.date, format = "%d%b%Y"),
     
     # Replace empty date fields with the last date of the study
-    Failure.date = if_else(is.na(Failure.date), as.Date("2019-12-31"), 
+    Failure.date = if_else(is.na(Failure.date), as.Date("2019-12-31"),
                            Failure.date),
     
     # Repair event indicator (1 = repair, 0 = no/censored)
@@ -75,27 +76,7 @@ data <- og_data %>%
     # New variable: Possession time in hours
     Possession.time = as.numeric(difftime(Failure.date, Registration.date, units = "hours"))
 
-    # # Dealing with the candidates for censoring
-    # # damage_but_no_failure_date:
-    # Sent.for.repair = replace(Sent.for.repair, damage_but_no_failure_date_idx, 0),
-    # Battery.status = replace(Battery.status, damage_but_no_failure_date_idx, 1),
-    # IR.status = replace(IR.status, damage_but_no_failure_date_idx, 1),
-    # Impact.status = replace(Impact.status, damage_but_no_failure_date_idx, 1),
-    # 
-    # # ok_parts_but_failure:
-    # Sent.for.repair = replace(Sent.for.repair, ok_parts_but_failure_idx, 0),
-    # # Failure Date?? Final date of study??
-    
     ) %>%
-  filter(Total.usage.time > 0)  # Remove invalid survival times (these were devices registered on the last day of the study)
-    
-View(data)
-
-# # To save a csv:
-# write.csv(data, file = "C:/Users/20221564/Data_Science_and_Artificial_Intelligence/Survival-Analysis-DirtSlurper3100-GA/data_preprocessed.csv", row.names = FALSE)
-
-# Create copy for EDA purposes with categorical (factor) conversions
-data_eda <- data %>%
   mutate(
     Pets = factor(Pets, levels = c(0, 1), labels = c("No", "Yes")),
     Sent.for.repair = factor(Sent.for.repair, levels = c(0, 1), labels = c("No", "Yes")),
@@ -105,6 +86,8 @@ data_eda <- data %>%
     Carpet.score = factor(Carpet.score, levels = sort(unique(Carpet.score))),
     reg_year = factor(lubridate::year(Registration.date))
   )
+
+View(data_eda)
 
 # ---- Visualizations ----
 
@@ -176,8 +159,8 @@ ggplot(data_eda, aes(x = IR.status, fill = Sent.for.repair)) +
 # Scatter plot: Usage vs Possession Time
 ggplot(data_eda, aes(x = Possession.time, y = Total.usage.time, color = Sent.for.repair)) +
   geom_point(alpha = 0.5) +
-  geom_smooth(aes(linetype = Sent.for.repair), method = "lm", se = TRUE, color = "black") +
-  scale_linetype_manual(values = c("0" = "dotted", "1" = "solid")) +
+  geom_smooth(aes(linetype = as.factor(Sent.for.repair)), method = "lm", se = TRUE, color = "black") +
+  scale_linetype_manual(values = c("No" = "dotted", "Yes" = "solid")) +
   labs(title = "Usage vs. Possession Time by Repair Status",
        x = "Possession Time (hours)",
        y = "Total Usage Time (hours)",
@@ -201,19 +184,19 @@ pets <- data_eda$Pets
 pets_mean <- tapply(totaltime, pets, mean, na.rm = TRUE)
 barplot(pets_mean,
         names.arg = names(pets_mean),
-        col = c("blue", "red"),
-        main = "Vacuum Cleaner Usage wrt Presence of Pets",
+        col = c("cadetblue"),
+        main = "Vacuum Cleaner Usage based on Presence of Pets",
         xlab = "Pets",
         ylab = "Average Usage Time (hours)")
 # Yes the vacuum works more if there are pets 
 
 # Relation between Carpet Score and Total usage time
 carpetscore <- data_eda$Carpet.score
-carpet_mean <- tapply(totaltime, carpetscore, mean, na.rm = TRUE)
+carpet_mean <- tapply(data_eda$Total.usage.time, data_eda$Carpet.score, mean, na.rm = TRUE)
 barplot(carpet_mean,
         names.arg = names(carpet_mean),
-        col = c("blue", "green"),
-        main = "Vacuum Cleaner Usage wrt Carpet Area",
+        col = c("cadetblue"),
+        main = "Vacuum Cleaner Usage based on Carpet Area",
         xlab = "Carpet Score",
         ylab = "Average Usage Time (hours)")
 # This strangely implies that carpet area is not influencing the working time of the vacuum cleaner
@@ -223,8 +206,8 @@ sent_repair <- data_eda$Sent.for.repair
 mean_value <- tapply(totaltime, sent_repair, mean, na.rm = TRUE)
 barplot(mean_value,
         names.arg = names(mean_value),
-        col = c("yellow", "red"),
-        main = "Usage of Vacuum and Repairs required by it",
+        col = c("cadetblue", "coral"),
+        main = "Average usage of Vacuum sent for repairs vs not",
         xlab = "Sent for Repair",
         ylab = "Average Usage Time (hours)")
 # This implies that a vacuum that is used intensively requires frequent repairs
@@ -247,14 +230,14 @@ fail <- c(battery_fail, impactsensor_fail, infraredsensor_fail)
 
 barplot(rbind(ok, fail),
         beside = TRUE,
-        col = c("green", "orange"),
+        col = c("cadetblue", "coral"),
         names.arg = c("Battery", "Impact Sensor", "Infrared Sensor"),
-        main = "Staus of Components",
+        main = "Status of Components",
         xlab = "Components of Vacuum",
         ylab = "Count")
 legend("topright",
        legend = c("OK", "Damage"),
-       fill = c("green", "orange"),
+       fill = c("cadetblue", "coral"),
        inset = c(-0.07, -0.07), bty = "n")  
 # This implies that Battery is the most sensitive followed by Infrared and Impact Sensor
 
@@ -275,14 +258,14 @@ damage <- c(battery_damage, impact_damage, ir_damage)
 
 barplot(rbind(ok, damage),
         beside = TRUE,
-        col = c("purple", "cyan"),
+        col = c("cadetblue", "coral"),
         names.arg = c("Battery", "Impact Sensor", "Infrared Sensor"),
         main = "Status of Components",
         xlab = "Components of Vacuum",
         ylab = "Average Usage Time (hours)")
 legend("topleft",
        legend = c("OK", "Damage"),
-       fill = c("purple", "cyan"),
+       fill = c("cadetblue", "coral"),
        inset = c(-0.02, -0.02),
        bty = "n")
 # Infrared Sensor fails when vacuum used less as opposed to battery and impact where more use corresponds to more failure
@@ -317,40 +300,40 @@ fail_matrix <- rbind(Battery = battery_fail,
 
 barplot(fail_matrix,
         beside = TRUE,
-        col = c("lightgreen", "cyan", "magenta"),
+        col = c("tomato", "steelblue", "orange"),
         main = "Component Failures by Extensive Carpet Area",
         xlab = "Carpet Score",
         ylab = "Failure Count")
 legend("topright", legend = c("Battery", "Impact Sensor", "Infrared Sensor"),
-       fill = c("lightgreen", "cyan", "magenta"), bty = "n")
+       fill = c("tomato", "steelblue", "orange"), bty = "n")
 # Failure rate highest when carpet score is 3; Battery followed by IR Sensor, followed by Impact Sensor.
 # So carpet area does not determine failure of the vacuum reaffirmed
 
 # ---- Cansu plots ----------------------------------------------------
 
-# VIM missing data pattern plot
-VIM::aggr(data_eda, col = c("navyblue", "red"),
-          numbers = TRUE, sortVars = TRUE,
-          main = "Missing Data Pattern")
+# # VIM missing data pattern plot COMMENTED OUT BECAUSE PREPROCESSING STEPS NEED TO BE REVERTED FOR THIS (MISSING VALUES FILLED)
+# VIM::aggr(data_eda, col = c("navyblue", "red"),
+#           numbers = TRUE, sortVars = TRUE,
+#           main = "Missing Data Pattern")
 
-# Heatmap of missing data
-data_eda %>%
-  is.na() %>%
-  as.data.frame() %>%
-  mutate(row = row_number()) %>%
-  pivot_longer(-row, names_to = "variable", values_to = "is_missing") %>%
-  ggplot(aes(variable, row, fill = is_missing)) +
-  geom_tile() +
-  scale_fill_manual(values = c("FALSE" = "lightblue", "TRUE" = "red"),
-                    name = "Missing") +
-  theme_minimal() +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
-  labs(title = "Missing Data Heatmap",
-       x = "Variables", y = "Observations")
+# # Heatmap of missing data
+# data_eda %>%
+#   is.na() %>%
+#   as.data.frame() %>%
+#   mutate(row = row_number()) %>%
+#   pivot_longer(-row, names_to = "variable", values_to = "is_missing") %>%
+#   ggplot(aes(variable, row, fill = is_missing)) +
+#   geom_tile() +
+#   scale_fill_manual(values = c("FALSE" = "lightblue", "TRUE" = "red"),
+#                     name = "Missing") +
+#   theme_minimal() +
+#   theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+#   labs(title = "Missing Data Heatmap",
+#        x = "Variables", y = "Observations")
 
 # Log-transformed Usage Time 
 ggplot(data_eda, aes(x = log(Total.usage.time + 1))) +
-  geom_histogram(bins = 50, fill = "lightgreen", color = "black", alpha = 0.7) +
+  geom_histogram(bins = 50, fill = "cadetblue", color = "black", alpha = 0.7) +
   labs(title = "Distribution of Log(Usage Time + 1)",
        x = "Log(Total Usage Time + 1)", y = "Frequency") +
   theme_minimal()
@@ -361,11 +344,11 @@ ggplot(data_eda, aes(x = factor(Pets), y = Total.usage.time, fill = factor(Pets)
   labs(title = "Usage Time by Pet Ownership",
        x = "Has Pets", y = "Total Usage Time (hours)") +
   theme_minimal() +
-  scale_fill_manual(values = c("0" = "lightblue", "1" = "lightcoral"))
+  scale_fill_manual(values = c("No" = "cadetblue", "Yes" = "coral"))
 
 # Boxplot: Usage Time by Carpet Score 
 ggplot(data_eda, aes(x = factor(Carpet.score), y = Total.usage.time)) +
-  geom_boxplot(fill = "lightgreen", alpha = 0.7) +
+  geom_boxplot(fill = "cadetblue", alpha = 0.7) +
   labs(title = "Usage Time by Carpet Score",
        x = "Carpet Score", y = "Total Usage Time (hours)") +
   theme_minimal()
@@ -383,9 +366,9 @@ failure_by_usage <- data_eda %>%
   group_by(usage_quartile) %>%
   summarise(
     n = n(),
-    battery_failures = sum(Battery.status == 0, na.rm = TRUE),
-    impact_failures = sum(Impact.status == 0, na.rm = TRUE),
-    ir_failures = sum(IR.status == 0, na.rm = TRUE),
+    battery_failures = sum(Battery.status == 1, na.rm = TRUE),
+    impact_failures = sum(Impact.status == 1, na.rm = TRUE),
+    ir_failures = sum(IR.status == 1, na.rm = TRUE),
     battery_rate = round(battery_failures / sum(!is.na(Battery.status)) * 100, 1),
     impact_rate = round(impact_failures / sum(!is.na(Impact.status)) * 100, 1),
     ir_rate = round(ir_failures / sum(!is.na(IR.status)) * 100, 1)
@@ -393,31 +376,29 @@ failure_by_usage <- data_eda %>%
 
 print(failure_by_usage)
 
-# Registrations by Year 
-data_eda$reg_year <- lubridate::year(data_eda$Registration.date)
 
 ggplot(data_eda, aes(x = factor(reg_year))) +
-  geom_bar(fill = "lightblue", color = "black", alpha = 0.7) +
+  geom_bar(fill = "cadetblue", color = "black", alpha = 0.7) +
   labs(title = "Registrations by Year",
        x = "Registration Year", y = "Count") +
   theme_minimal()
 
 # Follow-up Time Distribution 
 ggplot(data_eda, aes(x = Possession.time / 24)) +
-  geom_histogram(bins = 50, fill = "lightblue", color = "black", alpha = 0.7) +
+  geom_histogram(bins = 50, fill = "cadetblue", color = "black", alpha = 0.7) +
   labs(title = "Distribution of Follow-up Times",
        x = "Follow-up Time (days)", y = "Frequency") +
   theme_minimal()
 
 # Follow-up Time by Registration Year 
 ggplot(data_eda, aes(x = factor(reg_year), y = Possession.time / 24)) +
-  geom_boxplot(fill = "lightcoral", alpha = 0.7) +
+  geom_boxplot(fill = "cadetblue", alpha = 0.7) +
   labs(title = "Follow-up Time by Registration Year",
        x = "Registration Year", y = "Follow-up Time (days)") +
   theme_minimal()
 
 # Summary table with key statistics
-summary_table <- data_eda %>%
+summary_table <- data %>%
   summarise(
     n_units = n(),
     usage_mean = round(mean(Total.usage.time, na.rm = TRUE), 1),
@@ -437,6 +418,7 @@ print(summary_table)
 cat("\n=== T-TEST: Usage Time by Pet Ownership ===\n")
 pet_usage_test <- t.test(Total.usage.time ~ Pets, data = data_eda)
 print(pet_usage_test)
+<<<<<<< HEAD
 
 #------------------------------------------KM Estimator----------------------------------------------#
 #forthe dmy function
@@ -547,3 +529,5 @@ text(x = bp,
 #---------------------------------------------------------------------------#
 #Analysis Inferences can be done with summaries
 
+=======
+>>>>>>> ef799af9f0caa5e2a565884140e026c3404aec18
