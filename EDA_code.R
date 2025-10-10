@@ -6,9 +6,9 @@ library(ggplot2)
 library(VIM)
 library(tidyr)
 library(tidyverse)
-
+library(lubridate)
 # Set path to CSV data file 
-file_path <- "D:\\TUE Study Material\\Q1\\Survival Analysis for Data Scientists\\GA_17\\DirtSlurper\\Survival-Analysis-DirtSlurper3100-GA\\DirtSlurper3100.csv"
+file_path <- "D:\\TUE Study Material\\Q1\\Survival Analysis for Data Scientists\\GA_17\\Survival-Analysis-DirtSlurper3100-GA\\DirtSlurper3100.csv"
 
 # Read data
 og_data <- read.table(file_path,
@@ -40,7 +40,7 @@ ok_parts_but_failure_idx <- which(
 )
 
 # Convert the indices to a single vector of rows to drop
-rows_to_drop <- union(ok_parts_but_failure_idx, damage_but_no_failure_date_idx)
+#rows_to_drop <- union(ok_parts_but_failure_idx, damage_but_no_failure_date_idx)
 
 # POSIX standard English locale 
 Sys.setlocale("LC_TIME", "C")  
@@ -440,7 +440,6 @@ print(pet_usage_test)
 
 #------------------------------------------KM Estimator----------------------------------------------#
 #forthe dmy function
-library(lubridate)
 #for the analysing survival
 #library(survival) already
 #for pretty plotting of Survival Functions
