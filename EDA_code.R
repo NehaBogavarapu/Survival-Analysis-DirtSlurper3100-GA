@@ -3,11 +3,9 @@ library(survival)
 library(survminer) 
 library(VIM)
 library(tidyverse)
-library(lubridate)
+
 # Set path to CSV data file 
-
 file_path <- "D:\\TUE Study Material\\Q1\\Survival Analysis for Data Scientists\\GA_17\\Survival-Analysis-DirtSlurper3100-GA\\DirtSlurper3100.csv"
-
 
 # Read data
 og_data <- read.table(file_path,
@@ -39,7 +37,7 @@ ok_parts_but_failure_idx <- which(
 )
 
 # Convert the indices to a single vector of rows to drop
-#rows_to_drop <- union(ok_parts_but_failure_idx, damage_but_no_failure_date_idx)
+rows_to_drop <- union(ok_parts_but_failure_idx, damage_but_no_failure_date_idx)
 
 # POSIX standard English locale 
 Sys.setlocale("LC_TIME", "C")  
@@ -48,9 +46,13 @@ Sys.setlocale("LC_TIME", "C")
 data_eda <- og_data %>%
   slice(-rows_to_drop) %>% # Drop the rows_to_drop
   mutate(
+    # Replace "---" or empty strings with NA
+    Registration.date = na_if(Registration.date, "---"),
+    Failure.date = na_if(Failure.date, "---"),
+    
     # Format dates 
-    Registration.date = as.Date(Registration.date, format = "%d%b%Y"),
-    Failure.date = as.Date(Failure.date, format = "%d%b%Y"),
+    Registration.date = dmy(Registration.date), 
+    Failure.date = dmy(Failure.date),
     
     # Replace empty date fields with the last date of the study
     Failure.date = if_else(is.na(Failure.date), as.Date("2019-12-31"),
@@ -73,8 +75,8 @@ data_eda <- og_data %>%
     
     # New variable: Possession time in hours
     Possession.time = as.numeric(difftime(Failure.date, Registration.date, units = "hours"))
-
-    ) %>%
+    
+  ) %>%
   mutate(
     Pets = factor(Pets, levels = c(0, 1), labels = c("No", "Yes")),
     Sent.for.repair = factor(Sent.for.repair, levels = c(0, 1), labels = c("No", "Yes")),
@@ -354,9 +356,9 @@ ggplot(data_eda, aes(x = factor(Carpet.score), y = Total.usage.time)) +
 # Component Failures by Usage Quartile 
 # Create usage time quartiles
 data_eda$usage_quartile <- cut(data_eda$Total.usage.time,
-                           breaks = quantile(data_eda$Total.usage.time, probs = c(0, 0.25, 0.5, 0.75, 1), na.rm = TRUE),
-                           labels = c("Q1", "Q2", "Q3", "Q4"),
-                           include.lowest = TRUE)
+                               breaks = quantile(data_eda$Total.usage.time, probs = c(0, 0.25, 0.5, 0.75, 1), na.rm = TRUE),
+                               labels = c("Q1", "Q2", "Q3", "Q4"),
+                               include.lowest = TRUE)
 
 # Failure rates by usage quartile (summary table)
 failure_by_usage <- data_eda %>%
