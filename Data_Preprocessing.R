@@ -1,5 +1,7 @@
+
+
 # Set path to CSV data file 
-file_path <- "C:/Users/20221564/OneDrive - TU Eindhoven/Data Science and Artificial Intelligence Masters/Survival Analysis/DirtSlurper3100.csv"
+file_path <- "D:\\TUE Study Material\\Q1\\Survival Analysis for Data Scientists\\GA_17\\Survival-Analysis-DirtSlurper3100-GA\\DirtSlurper3100.csv"
 
 # Read data
 og_data <- read.table(file_path,
@@ -58,11 +60,11 @@ data <- og_data %>%
     
     # New variable: Possession time in hours
     Possession.time = as.numeric(difftime(Failure.date, Registration.date, units = "hours"))
-
+    
   ) %>%
   filter(Total.usage.time > 0)  # Remove invalid survival times (these were devices registered on the last day of the study)
 
 View(data)
 
 # # To save a csv:
-# write.csv(data, file = "C:/Users/20221564/Data_Science_and_Artificial_Intelligence/Survival-Analysis-DirtSlurper3100-GA/data_preprocessed.csv", row.names = FALSE)
+ write.csv(data, file = "D:\\TUE Study Material\\Q1\\Survival Analysis for Data Scientists\\GA_17\\Survival-Analysis-DirtSlurper3100-GA\\Dirtprep.csv", row.names = FALSE)

@@ -5,11 +5,9 @@ library(VIM)
 library(tidyverse)
 library(lubridate)
 # Set path to CSV data file 
-<<<<<<< HEAD
+
 file_path <- "D:\\TUE Study Material\\Q1\\Survival Analysis for Data Scientists\\GA_17\\Survival-Analysis-DirtSlurper3100-GA\\DirtSlurper3100.csv"
-=======
-file_path <- "C:/Users/20221564/OneDrive - TU Eindhoven/Data Science and Artificial Intelligence Masters/Survival Analysis/DirtSlurper3100.csv"
->>>>>>> ef799af9f0caa5e2a565884140e026c3404aec18
+
 
 # Read data
 og_data <- read.table(file_path,
@@ -418,116 +416,3 @@ print(summary_table)
 cat("\n=== T-TEST: Usage Time by Pet Ownership ===\n")
 pet_usage_test <- t.test(Total.usage.time ~ Pets, data = data_eda)
 print(pet_usage_test)
-<<<<<<< HEAD
-
-#------------------------------------------KM Estimator----------------------------------------------#
-#forthe dmy function
-#for the analysing survival
-#library(survival) already
-#for pretty plotting of Survival Functions
-#library(survminer) already
-
-study_end <- dmy("31-12-2019")
-failuredate <- as.Date(data_eda$Failure.date,format="%d-%m-%Y")
-
-##Changing the convention i.e 1 for failure and 0 for censored
-#failuredate-reg=working time, if failure not given means vacuum working
-#so then study_end -reg=working time(handles ok values)
-# setting up parameters for Battery 
-time_battery <- ifelse(!is.na(failuredate) & batterystatus == "Damage",
-                       as.numeric(difftime(failuredate, reg, units="days")),
-                       as.numeric(difftime(study_end, reg, units="days")))
-event_battery <- ifelse(batterystatus == "Damage", 1, 0)
-
-# setting up parameters for Impact Sensor
-time_impactsensor <- ifelse(!is.na(failuredate) & impactsensor_status == "Damage",
-                            as.numeric(difftime(failuredate, reg, units="days")),
-                            as.numeric(difftime(study_end, reg, units="days")))
-event_impactsensor <- ifelse(impactsensor_status == "Damage", 1, 0)
-
-# setting up parameters for INFRARED Sensor
-time_infraredsensor <- ifelse(!is.na(failuredate) & infraredsensor_status == "Damage",
-                              as.numeric(difftime(failuredate, reg, units="days")),
-                              as.numeric(difftime(study_end, reg, units="days")))
-event_infraredsensor <- ifelse(infraredsensor_status == "Damage", 1, 0)
-
-# setting up parameters for analysing survival of Whole Vacuum (fails if ANY component fails) 
-event_vacuum <- ifelse((batterystatus == "Damage" |
-                          impactsensor_status == "Damage" |
-                          infraredsensor_status == "Damage"), 1, 0)
-
-time_vacuum <- ifelse(event_vacuum == 1 & !is.na(failuredate),
-                      as.numeric(difftime(failuredate, reg, units="days")),
-                      as.numeric(difftime(study_end, reg, units="days")))
-
-# Kaplan Mier Estimation
-km_battery <- survfit(Surv(time_battery, event_battery) ~ 1, data = data_eda)
-km_impactsensor  <- survfit(Surv(time_impactsensor, event_impactsensor) ~ 1, data = data_eda)
-km_infraredsensor   <- survfit(Surv(time_infraredsensor, event_infraredsensor) ~ 1, data = data_eda)
-km_vacuum  <- survfit(Surv(time_vacuum, event_vacuum) ~ 1)
-
-# KM Plots for all the components as well as the whole vacuum
-ggsurvplot(km_battery, data = data_eda, conf.int=TRUE, title="Battery Survival", xlab="Days", ylab="Survival Probability")
-ggsurvplot(km_impactsensor, data = data_eda, conf.int=TRUE, title="Impact Sensor Survival", xlab="Days", ylab="Survival Probability")
-ggsurvplot(km_infraredsensor, data = data_eda, conf.int=TRUE, title="Infrared Sensor Survival", xlab="Days", ylab="Survival Probability")
-ggsurvplot(km_vacuum, data = data_eda, conf.int=TRUE, title="Overall Vacuum Survival", xlab="Days", ylab="Survival Probability")
-
-# Survival probabilities, Error and Confidence Intervals  at 500, 1000, 1500 days
-#Max time is close to somewhere 1800 something 
-summary(km_battery, times=c(500,1000,1500))
-summary(km_impactsensor, times=c(500,1000,1500))
-summary(km_infraredsensor, times=c(500,1000,1500))
-summary(km_vacuum, times=c(500,1000,1500))
-
-
-#----------------------------------------------------------------------------#
-
-
-#Analysing Inference two(a)
-# setting up parameters for Battery that runs at most 2400 hours
-time_battery2400 <- ifelse(!is.na(failuredate) & totaltime<=2400 & batterystatus == "Damage" ,
-                           as.numeric(difftime(failuredate, reg, units="days")),
-                           as.numeric(difftime(study_end, reg, units="days")))
-event_battery2400 <- ifelse(batterystatus == "Damage", 1, 0)
-
-# Kaplan Mier Estimation
-km_battery2400 <- survfit(Surv(time_battery2400, event_battery2400) ~ 1, data = data_eda)
-
-# KM Plot for battery that runs less than 2400 hours
-ggsurvplot(km_battery2400, data = data_eda, conf.int=TRUE, title="Survival of Batteries that run <=2400 hours", xlab="Days", ylab="Survival Probability")
-
-# Survival probabilities, Error and Confidence Intervals  at 500, 1000, 1500 days
-summary(km_battery2400, times=c(500,1000,1500))
-
-#Analysing Inference two(b)
-#Battery that works for greater than 2400 hours sent for repair or not
-#Hypothesis that every time it fails sent for repair, and when OK it isnot sent for repair
-g2400batterysent <- ifelse(totaltime>2400 ,as.character(data_eda$Sent.for.repair),NA)
-g2400battery_ok=sum(g2400batterysent=="No",na.rm=TRUE)
-g2400battery_fail=sum(g2400batterysent=="Yes",na.rm=TRUE)
-
-ok_notsent <- c(g2400battery_ok)
-fail_sent <- c(g2400battery_fail)
-
-bp<-barplot(rbind(ok_notsent, fail_sent),
-            beside = TRUE,
-            col = c("blue", "orange"),
-            names.arg = c("Battery"),
-            main = "Repair status of Components",
-            xlab = "Components of Vacuum",
-            ylab = "Count")
-legend("topleft",
-       legend = c("Not Sent", "Sent"),
-       fill = c("blue", "orange"),
-       inset = c(-0.07, -0.07),bty = "n")  
-# Adding text on top of bars
-text(x = bp, 
-     y = rbind(ok_notsent, fail_sent), 
-     labels = rbind(ok_notsent, fail_sent), 
-     pos = 1)  
-#pos# Determines position of text to the top of the bar
-#---------------------------------------------------------------------------#
-#Analysis Inferences can be done with summaries
-
-=======
->>>>>>> ef799af9f0caa5e2a565884140e026c3404aec18
