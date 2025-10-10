@@ -1,4 +1,9 @@
+<<<<<<< HEAD
 
+=======
+# Load packages 
+library(tidyverse)
+>>>>>>> 0fd9366ad54cc64cc482ffb093812754f2af8f5c
 
 # Set path to CSV data file 
 file_path <- "D:\\TUE Study Material\\Q1\\Survival Analysis for Data Scientists\\GA_17\\Survival-Analysis-DirtSlurper3100-GA\\DirtSlurper3100.csv"
@@ -67,4 +72,8 @@ data <- og_data %>%
 View(data)
 
 # # To save a csv:
+<<<<<<< HEAD
  write.csv(data, file = "D:\\TUE Study Material\\Q1\\Survival Analysis for Data Scientists\\GA_17\\Survival-Analysis-DirtSlurper3100-GA\\Dirtprep.csv", row.names = FALSE)
+=======
+# write.csv(data, file = "C:/Users/20221564/Data_Science_and_Artificial_Intelligence/Survival-Analysis-DirtSlurper3100-GA/data_preprocessed.csv", row.names = FALSE)
+>>>>>>> 0fd9366ad54cc64cc482ffb093812754f2af8f5c
