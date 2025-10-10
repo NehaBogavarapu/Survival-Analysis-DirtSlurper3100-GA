@@ -170,14 +170,14 @@ surv_times <- km_summary$time
 quantile_10 <- min(surv_times[surv_probs <= 0.90])
 # Print the result
 cat("Estimated 10% quantile :", quantile_10, "\n")
-# Our estimate that parts survive 936 days (general not asked anywhere)
+# Our estimate that battery parts survive 936 days (general not asked anywhere)
 #--------------------------------------------------------------#
   # Overall Extract survival probabilities and corresponding times of impact sensor
-  #inf at 90
+  #infinity at 90
 km_summary <- summary(km_impactsensor)
 surv_probs <- km_summary$surv
 surv_times <- km_summary$time
-# Find the earliest time when survival drops to or below 0.90
+# Find the earliest time when survival drops to or below 0.95
 quantile_5 <- min(surv_times[surv_probs <= 0.95])
 # Print the result
 cat("Estimated 5% quantile :", quantile_5, "\n")
