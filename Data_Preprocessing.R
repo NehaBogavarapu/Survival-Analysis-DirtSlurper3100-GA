@@ -1,3 +1,6 @@
+# Load packages 
+library(tidyverse)
+
 # Set path to CSV data file 
 file_path <- "C:/Users/20221564/OneDrive - TU Eindhoven/Data Science and Artificial Intelligence Masters/Survival Analysis/DirtSlurper3100.csv"
 
