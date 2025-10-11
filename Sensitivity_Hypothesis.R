@@ -141,8 +141,8 @@ ggsurvplot(km_carpet, conf.int = TRUE,
 #This maybe a reason that device is failing more than expected. 
 
 
-
-# 1. Create Carpet Score Groups
+#-------------------------Verifying vacuum performance wrt to carpet score------------#
+# 
 data <- data %>%
   mutate(carpet_group = case_when(
     Carpet.score <= 3 ~ "Low",
@@ -150,14 +150,9 @@ data <- data %>%
     TRUE ~ "High"
   ))
 
-# 2. Create Survival Object for Battery
-# Make sure time_battery = time to failure OR censor, and Battery.status is event indicator (1 = failed, 0 = ok)
+# Survival Object for Battery
 surv_batt <- Surv(time_vacuum, event_vacuum)
-
-# 3. Fit KM Model by Carpet Group
 km_batt_carpet <- survfit(surv_batt ~ carpet_group, data = data)
-
-# 4. Plot
 ggsurvplot(
   km_batt_carpet,
   data = data,
@@ -170,3 +165,91 @@ ggsurvplot(
   legend.labs = c("Low", "Medium", "High"),
   ggtheme = theme_minimal()
 )
+#----------------Hypothesis---------------------------#
+#For infrared sensor
+#One-sided test on the KM survival at time = 2000 using Greenwood variance.
+#ho=Claim of manufacturer true(L10>=2000 days)ie. S(2000>=0.90)
+#h1=Claim of Manufcaturer false (L10<2000 days)S(2000<0.90)
+km_ir <- survfit(Surv(time_infraredsensor, event_infraredsensor) ~ 1, data = data)
+
+# helper to get S_hat and SE at time t
+get_surv_at <- function(km, t) {
+  s <- summary(km, times = t, extend = TRUE)
+  # summary returns a list; s$surv and s$std.err if available
+  S_hat <- ifelse(length(s$surv)==0, NA, s$surv)
+  SE <- ifelse(length(s$std.err)==0, NA, s$std.err)
+  list(S = S_hat, SE = SE)
+}
+
+t0 <- 2000
+res <- get_surv_at(km_ir, t0)
+S_hat <- res$S
+SE <- res$SE
+
+# Z-test (one-sided: H0: S >= 0.9 vs H1: S < 0.9)
+z <- (S_hat - 0.90) / SE
+p_value_one_sided <- pnorm(z)  # lower-tail p-value
+
+list(t = t0, S_hat = S_hat, SE = SE, z = z, p_one_sided = p_value_one_sided)
+#Claim of manufacturer holds for IR as p value>=0.50 so null hypothesis correct
+
+
+#----------Hypothesis For Battery based inference
+#For Battery
+#Ho:Battery that is not being used intensively i.e more than 2400 hrs lasts atleast 1000 days
+#H1:Battery that is not being used intensively i.e more than 2400 hrs does not last 1000 days
+
+time_battery2400 <- ifelse(!is.na(failuredate) & data$Total.usage.time<=2400 & data$Battery.status == 1 ,
+                           as.numeric(difftime(failuredate, reg, units="days")),
+                           as.numeric(difftime(study_end, reg, units="days")))
+event_battery2400 <- ifelse(data$Battery.status == 1, 1, 0)
+
+km_battery2400 <- survfit(Surv(time_battery2400, event_battery2400) ~ 1, data = data)
+
+# helper to get S_hat and SE at time t
+get_surv_at <- function(km, t) {
+  s <- summary(km, times = t, extend = TRUE)
+  # summary returns a list; s$surv and s$std.err if available
+  S_hat <- ifelse(length(s$surv)==0, NA, s$surv)
+  SE <- ifelse(length(s$std.err)==0, NA, s$std.err)
+  list(S = S_hat, SE = SE)
+}
+
+t0 <- 1000
+res <- get_surv_at(km_battery2400, t0)
+S_hat <- res$S
+SE <- res$SE
+
+# Z-test (one-sided: H0: S >= 0.9 vs H1: S < 0.9)
+z <- (S_hat - 0.90) / SE
+p_value_one_sided <- pnorm(z)  # lower-tail p-value
+
+list(t = t0, S_hat = S_hat, SE = SE, z = z, p_one_sided = p_value_one_sided)
+#Claim of manufacturer holds for Batteries as p value>=0.50 so null hypothesis correct
+
+
+#--------------------Claim of Impact Sensor-------------------#
+#No claim just check
+km_impactsensor <- survfit(Surv(time_impactsensor, event_impactsensor) ~ 1, data = data)
+
+# helper to get S_hat and SE at time t
+get_surv_at <- function(km, t) {
+  s <- summary(km, times = t, extend = TRUE)
+  # summary returns a list; s$surv and s$std.err if available
+  S_hat <- ifelse(length(s$surv)==0, NA, s$surv)
+  SE <- ifelse(length(s$std.err)==0, NA, s$std.err)
+  list(S = S_hat, SE = SE)
+}
+
+t0 <- 2000
+res <- get_surv_at(km_impactsensor, t0)
+S_hat <- res$S
+SE <- res$SE
+
+# Z-test (one-sided: H0: S >= 0.9 vs H1: S < 0.9)
+z <- (S_hat - 0.90) / SE
+p_value_one_sided <- pnorm(z)  # lower-tail p-value
+
+list(t = t0, S_hat = S_hat, SE = SE, z = z, p_one_sided = p_value_one_sided)
+#Claim made none holds but for Impact Sensor our analysis holds  as p value>=0.50 
+
