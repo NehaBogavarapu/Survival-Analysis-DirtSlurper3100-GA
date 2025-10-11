@@ -1,8 +1,10 @@
-# Load packages 
 library(tidyverse)
+library(lubridate)
 
 # Set path to CSV data file 
-file_path <- "C:/Users/20221564/OneDrive - TU Eindhoven/Data Science and Artificial Intelligence Masters/Survival Analysis/DirtSlurper3100.csv"
+file_path <- "D:\\TUE Study Material\\Q1\\Survival Analysis for Data Scientists\\GA_17\\Survival-Analysis-DirtSlurper3100-GA\\DirtSlurper3100.csv"
+
+# Load packages 
 
 # Read data
 og_data <- read.table(file_path,
@@ -33,12 +35,18 @@ rows_to_drop <- union(ok_parts_but_failure_idx, damage_but_no_failure_date_idx)
 Sys.setlocale("LC_TIME", "C")  
 # (had to do this because dates with "Sep" were not being identified)
 
+#Using lubridate for registration.date
+
 data <- og_data %>%
   slice(-rows_to_drop) %>% # Drop the rows_to_drop
   mutate(
+    # Replace "---" or empty strings with NA
+    Registration.date = na_if(Registration.date, "---"),
+    Failure.date = na_if(Failure.date, "---"),
+    
     # Format dates 
-    Registration.date = as.Date(Registration.date, format = "%d%b%Y"),
-    Failure.date = as.Date(Failure.date, format = "%d%b%Y"),
+    Registration.date = dmy(Registration.date), 
+    Failure.date = dmy(Failure.date),
     
     # Replace empty date fields with the last date of the study
     Failure.date = if_else(is.na(Failure.date), as.Date("2019-12-31"), 
@@ -61,7 +69,7 @@ data <- og_data %>%
     
     # New variable: Possession time in hours
     Possession.time = as.numeric(difftime(Failure.date, Registration.date, units = "hours"))
-
+    
   ) %>%
   filter(Total.usage.time > 0)  # Remove invalid survival times (these were devices registered on the last day of the study)
 
