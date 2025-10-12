@@ -238,7 +238,7 @@ barplot(rbind(ok, fail),
 legend("topright",
        legend = c("OK", "Damage"),
        fill = c("cadetblue", "coral"),
-       inset = c(-0.07, -0.07), bty = "n")  
+       inset = c(-0.05, -0.05), bty = "n")  
 # This implies that Battery is the most sensitive followed by Infrared and Impact Sensor
 
 # Relation between Average usage time and Failure of Battery, Impact Sensor, Infrared Sensor
