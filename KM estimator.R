@@ -76,10 +76,10 @@ legend("bottomright", legend = c("Overall Device", "Battery", "Impact Sensor","I
 
 # Survival probabilities, Error and Confidence Intervals  at 500, 1000, 1500 days
 #Max time is close to somewhere 1800 something 
-summary(km_battery, times=c(500,1000,1500))
-summary(km_impactsensor, times=c(500,1000,1500))
-summary(km_infraredsensor, times=c(500,1000,1500))
-summary(km_vacuum, times=c(500,1000,1500))
+summary(km_battery, times=c(500,1000,1500,1800))
+summary(km_impactsensor, times=c(500,1000,1500,1800))
+summary(km_infraredsensor, times=c(500,1000,1500,1800))
+summary(km_vacuum, times=c(500,1000,1500,1800))
 
 
 #----------------------------------------------------------------------------#
@@ -117,7 +117,7 @@ cat("Estimated 10% quantile for battery that works less than 2400 hrs :", quanti
 #--------------------------------------------------------------------------------------#
 #Analysing Inference two(b)
 #Battery that works for greater than 2400 hours sent for repair or not
-#Hypothesis that every time it fails sent for repair, and when OK it isnot sent for repair
+#every time it fails sent for repair, and when OK it isnot sent for repair
 g2400batterysent <- ifelse(data$Total.usage.time>=2400 ,data$Sent.for.repair,NA)
 g2400battery_ok=sum(g2400batterysent==0,na.rm=TRUE)
 g2400battery_fail=sum(g2400batterysent==1,na.rm=TRUE)
@@ -157,7 +157,7 @@ surv_times <- km_summary$time
 # Find the earliest time when survival drops to or below 0.90
 quantile_10 <- min(surv_times[surv_probs <= 0.90])
 # Print the result
-cat("Estimated 10% quantile fro infrared Sensor :", quantile_10, "\n") #ans is infinity so yes
+cat("Estimated 10% quantile for infrared Sensor :", quantile_10, "\n") #ans is infinity so yes
 #This means less than 10% of the IR sensors actually failed within the follow-up window.
 #Hence, we cannot estimate L10 from KM, because there aren't enough failures to reach that 10% failure threshold.
 #for 0.95 there are 1059 days
