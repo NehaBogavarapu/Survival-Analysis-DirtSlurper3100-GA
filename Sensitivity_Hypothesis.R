@@ -86,7 +86,7 @@ ggarrange(p1$plot, p2$plot, ncol = 2, nrow = 1)
 #Sensitivity of Components wrt to Pets
 
 
-#Infrared Sensor only as doesn't make sense for Battery and Impact Sensor be analysed on the same
+#Infrared Sensor 
 km_pets <- survfit(Surv(time_infraredsensor, event_infraredsensor) ~ data$Pets, data = data)
 km_pets
 ggsurvplot(km_pets, conf.int = TRUE,
@@ -101,7 +101,7 @@ ggsurvplot(km_pets_b, conf.int = TRUE,
            xlab = "Days", ylab = "Survival Probability ",
            legend.labs = c("No Pets", "Pets"),
            ggtheme = theme_minimal(), data=data, title="Analysing Senstivity of Battery wrt to Pets")
-# NA values means very less failures and means Pets have nor impact so no Animal Specific Warranty needed for Battery
+
 
 km_pets_impact <- survfit(Surv(time_impactsensor, event_impactsensor) ~ data$Pets, data = data)
 km_pets_impact
@@ -110,7 +110,7 @@ ggsurvplot(km_pets_impact, conf.int = TRUE,
            legend.labs = c("No Pets", "Pets"),
            ggtheme = theme_minimal(), data=data, title="Analysing Senstivity of Impact Sensor wrt to Pets")
 
-
+#-----Checking wrt to Carpet Score------------#
 #Infrared has no relation
 data <- data %>%
   mutate(carpet_group = case_when(
@@ -119,9 +119,9 @@ data <- data %>%
     TRUE ~ "High"
   ))
 
-km_carpet <- survfit(Surv(time_infraredsensor, event_infraredsensor) ~ carpet_group, data = data)
+km_carpet_ir <- survfit(Surv(time_infraredsensor, event_infraredsensor) ~ carpet_group, data = data)
 
-ggsurvplot(km_carpet, conf.int = TRUE,
+ggsurvplot(km_carpet_ir, conf.int = TRUE,
            xlab = "Days", ylab = "Survival Probability",
            legend.title = "Carpet Level",
            ggtheme = theme_minimal(), data=data)
@@ -133,17 +133,17 @@ data <- data %>%
     TRUE ~ "High"
   ))
 #Impact sensor has no relation
-km_carpet <- survfit(Surv(time_impactsensor, event_impactsensor) ~ carpet_group, data = data)
-km_carpet
-ggsurvplot(km_carpet, conf.int = TRUE,
+km_carpet_impact <- survfit(Surv(time_impactsensor, event_impactsensor) ~ carpet_group, data = data)
+
+ggsurvplot(km_carpet_impact, conf.int = TRUE,
            xlab = "Days", ylab = "Survival Probability",
            legend.title = "Carpet Level",
            ggtheme = theme_minimal(), data=data)
 #battery
 #Carpet impacts,  has impact on battery
-km_carpet <- survfit(Surv(time_battery, event_battery) ~ carpet_group, data = data)
+km_carpet_battery <- survfit(Surv(time_battery, event_battery) ~ carpet_group, data = data)
 
-ggsurvplot(km_carpet, conf.int = TRUE,
+ggsurvplot(km_carpet_battery, conf.int = TRUE,
            xlab = "Days", ylab = "Survival Probability",
            legend.title = "Carpet Level",
            ggtheme = theme_minimal(), data=data)
@@ -185,8 +185,8 @@ ggsurvplot(
 #For infrared sensor
 #One-sided test on the KM survival at time = 2000 using Greenwood variance.
 #ho=Claim of manufacturer true(L10>=2000 days)ie. S(2000>=0.90)
-#h1=Claim of Manufcaturer false (L10<2000 days)S(2000<0.90)
-km_ir <- survfit(Surv(time_infraredsensor, event_infraredsensor) ~ 1, data = data)
+#h1=Claim of Manufacturer false (L10<2000 days)S(2000<0.90)
+kmh_ir <- survfit(Surv(time_infraredsensor, event_infraredsensor) ~ 1, data = data)
 
 # helper to get S_hat and SE at time t
 get_surv_at <- function(km, t) {
@@ -198,7 +198,7 @@ get_surv_at <- function(km, t) {
 }
 
 t0 <- 2000
-res <- get_surv_at(km_ir, t0)
+res <- get_surv_at(kmh_ir, t0)
 S_hat <- res$S
 SE <- res$SE
 
@@ -220,7 +220,7 @@ time_battery2400 <- ifelse(!is.na(failuredate) & data$Total.usage.time<=2400 & d
                            as.numeric(difftime(study_end, reg, units="days")))
 event_battery2400 <- ifelse(data$Battery.status == 1, 1, 0)
 
-km_battery2400 <- survfit(Surv(time_battery2400, event_battery2400) ~ 1, data = data)
+kmh_battery2400 <- survfit(Surv(time_battery2400, event_battery2400) ~ 1, data = data)
 
 # helper to get S_hat and SE at time t
 get_surv_at <- function(km, t) {
@@ -232,7 +232,7 @@ get_surv_at <- function(km, t) {
 }
 
 t0 <- 1000
-res <- get_surv_at(km_battery2400, t0)
+res <- get_surv_at(kmh_battery2400, t0)
 S_hat <- res$S
 SE <- res$SE
 
@@ -246,7 +246,7 @@ list(t = t0, S_hat = S_hat, SE = SE, z = z, p_one_sided = p_value_one_sided)
 
 #--------------------Claim of Impact Sensor-------------------#
 #No claim just check
-km_impactsensor <- survfit(Surv(time_impactsensor, event_impactsensor) ~ 1, data = data)
+kmh_impactsensor <- survfit(Surv(time_impactsensor, event_impactsensor) ~ 1, data = data)
 
 # helper to get S_hat and SE at time t
 get_surv_at <- function(km, t) {
@@ -258,7 +258,7 @@ get_surv_at <- function(km, t) {
 }
 
 t0 <- 2000
-res <- get_surv_at(km_impactsensor, t0)
+res <- get_surv_at(kmh_impactsensor, t0)
 S_hat <- res$S
 SE <- res$SE
 
