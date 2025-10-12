@@ -52,7 +52,7 @@ time_vacuum <- ifelse(event_vacuum == 1 & !is.na(failuredate),
 
 #-------------------------------------------------------------------------------#
 #Sensitivity of Components wrt to Extreme usage
-#Because extreme uasge has an overall impact
+#Because extreme usage has an overall impact
 
 #I set 2400 hrs as threshold
 threshold=2400
@@ -95,6 +95,22 @@ ggsurvplot(km_pets, conf.int = TRUE,
            ggtheme = theme_minimal(), data=data, title="Analysing Senstivity of Infrared Sensor wrt to Pets")
 # NA values means very less failures and means Pets have nor impact so no Animal Specific Warranty needed for IR sensor
 
+km_pets_b <- survfit(Surv(time_battery, event_battery) ~ data$Pets, data = data)
+km_pets_b
+ggsurvplot(km_pets_b, conf.int = TRUE,
+           xlab = "Days", ylab = "Survival Probability ",
+           legend.labs = c("No Pets", "Pets"),
+           ggtheme = theme_minimal(), data=data, title="Analysing Senstivity of Battery wrt to Pets")
+# NA values means very less failures and means Pets have nor impact so no Animal Specific Warranty needed for Battery
+
+km_pets_impact <- survfit(Surv(time_impactsensor, event_impactsensor) ~ data$Pets, data = data)
+km_pets_impact
+ggsurvplot(km_pets_impact, conf.int = TRUE,
+           xlab = "Days", ylab = "Survival Probability ",
+           legend.labs = c("No Pets", "Pets"),
+           ggtheme = theme_minimal(), data=data, title="Analysing Senstivity of Impact Sensor wrt to Pets")
+
+
 #Infrared has no relation
 data <- data %>%
   mutate(carpet_group = case_when(
@@ -109,7 +125,7 @@ ggsurvplot(km_carpet, conf.int = TRUE,
            xlab = "Days", ylab = "Survival Probability",
            legend.title = "Carpet Level",
            ggtheme = theme_minimal(), data=data)
-#Infrared has no relation
+#Infrared has no relation w.r.t to carpet
 data <- data %>%
   mutate(carpet_group = case_when(
     Carpet.score <= 3 ~ "Low",
@@ -118,7 +134,7 @@ data <- data %>%
   ))
 #Impact sensor has no relation
 km_carpet <- survfit(Surv(time_impactsensor, event_impactsensor) ~ carpet_group, data = data)
-
+km_carpet
 ggsurvplot(km_carpet, conf.int = TRUE,
            xlab = "Days", ylab = "Survival Probability",
            legend.title = "Carpet Level",
