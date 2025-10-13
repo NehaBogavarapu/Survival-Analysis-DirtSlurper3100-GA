@@ -5,7 +5,7 @@ library(VIM)
 library(tidyverse)
 
 # Set path to CSV data file 
-file_path <- "C:/Users/20221564/Data_Science_and_Artificial_Intelligence/Survival-Analysis-DirtSlurper3100-GA/DirtSlurper3100.csv"
+file_path <- "D:\\TUE Study Material\\Q1\\Survival Analysis for Data Scientists\\GA_17\\Survival-Analysis-DirtSlurper3100-GA\\DirtSlurper3100.csv"
 
 # Read data
 og_data <- read.table(file_path,
@@ -29,15 +29,16 @@ View(og_data)
 damage_but_no_failure_date_idx  <- which(og_data$Sent.for.repair == "YES" & og_data$Failure.date == "---")
 
 # All parts okay but there is a failure date (failure due to unobserved component):
-ok_parts_but_failure_idx <- which(
-  og_data$Battery.status == "OK" &
-    og_data$Impact.status == "OK" &
-    og_data$IR.status == "OK" &
-    og_data$Failure.date != "---"
-)
+#ok_parts_but_failure_idx <- which(
+#  og_data$Battery.status == "OK" &
+ #   og_data$Impact.status == "OK" &
+  #  og_data$IR.status == "OK" &
+   # og_data$Failure.date != "---"
+#)
 
 # Convert the indices to a single vector of rows to drop
-rows_to_drop <- union(ok_parts_but_failure_idx, damage_but_no_failure_date_idx)
+#rows_to_drop <- union(ok_parts_but_failure_idx, damage_but_no_failure_date_idx)
+rows_to_drop <- damage_but_no_failure_date_idx
 
 # POSIX standard English locale 
 Sys.setlocale("LC_TIME", "C")  
@@ -172,8 +173,8 @@ ggplot(data_eda, aes(x = Possession.time, y = Total.usage.time, color = Sent.for
 
 # Plot a scatter plot Registration date vs Total usage time 
 reg <- data_eda$Registration.date
-totaltime <- data_eda$Total.usage.time
-plot(reg, totaltime,
+totaltimehrs <- data_eda$Total.usage.time
+plot(reg, totaltimehrs,
      main = "Observation of Total Time wrt to Registration Date",
      xlab = "Registration Time", ylab = "Total Time")
 # Seemingly right as newer the product it would have worked less but of course there are exceptions as well
@@ -181,7 +182,7 @@ plot(reg, totaltime,
 # Relation between Usage Time and Presence of PETS
 # Mean usage time vs pets
 pets <- data_eda$Pets
-pets_mean <- tapply(totaltime, pets, mean, na.rm = TRUE)
+pets_mean <- tapply(totaltimehrs, pets, mean, na.rm = TRUE)
 barplot(pets_mean,
         names.arg = names(pets_mean),
         col = c("cadetblue"),
@@ -203,7 +204,7 @@ barplot(carpet_mean,
 
 # Relation between Vacuums sent back for repair vs their Total usage time
 sent_repair <- data_eda$Sent.for.repair
-mean_value <- tapply(totaltime, sent_repair, mean, na.rm = TRUE)
+mean_value <- tapply(totaltimehrs, sent_repair, mean, na.rm = TRUE)
 barplot(mean_value,
         names.arg = names(mean_value),
         col = c("cadetblue", "coral"),
@@ -238,13 +239,13 @@ barplot(rbind(ok, fail),
 legend("topright",
        legend = c("OK", "Damage"),
        fill = c("cadetblue", "coral"),
-       inset = c(-0.05, -0.05), bty = "n")  
+       inset = c(-0.06, -0.06), bty = "n")  
 # This implies that Battery is the most sensitive followed by Infrared and Impact Sensor
 
 # Relation between Average usage time and Failure of Battery, Impact Sensor, Infrared Sensor
-battery_mean <- tapply(totaltime, batterystatus, mean, na.rm = TRUE)
-impactsensor_mean <- tapply(totaltime, impactsensor_status, mean, na.rm = TRUE)
-infraredsensor_mean <- tapply(totaltime, infraredsensor_status, mean, na.rm = TRUE)
+battery_mean <- tapply(totaltimehrs, batterystatus, mean, na.rm = TRUE)
+impactsensor_mean <- tapply(totaltimehrs, impactsensor_status, mean, na.rm = TRUE)
+infraredsensor_mean <- tapply(totaltimehrs, infraredsensor_status, mean, na.rm = TRUE)
 
 battery_ok <- battery_mean["OK"]
 battery_damage <- battery_mean["Damage"]

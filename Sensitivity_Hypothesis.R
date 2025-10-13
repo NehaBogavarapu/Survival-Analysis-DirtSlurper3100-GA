@@ -42,9 +42,7 @@ time_infraredsensor <- ifelse(!is.na(failuredate) & data$IR.status == 1,
 event_infraredsensor <- ifelse(data$IR.status == 1, 1, 0)
 
 # setting up parameters for analysing survival of Whole Vacuum (fails if ANY component fails) 
-event_vacuum <- ifelse((data$Battery.status == 1 |
-                          data$Impact.status == 1 |
-                          data$IR.status == 1), 1, 0)
+event_vacuum <- ifelse(!is.na(failuredate), 1, 0)
 
 time_vacuum <- ifelse(event_vacuum == 1 & !is.na(failuredate),
                       as.numeric(difftime(failuredate, reg, units="days")),
@@ -167,10 +165,10 @@ data <- data %>%
   ))
 
 # Survival Object for Battery
-surv_batt <- Surv(time_vacuum, event_vacuum)
-km_batt_carpet <- survfit(surv_batt ~ carpet_group, data = data)
+surv_vacuum <- Surv(time_vacuum, event_vacuum)
+km_vacuum_carpet <- survfit(surv_vacuum ~ carpet_group, data = data)
 ggsurvplot(
-  km_batt_carpet,
+  km_vacuum_carpet,
   data = data,
   conf.int = TRUE,
   pval = TRUE,                     # Shows p-value from log-rank test
