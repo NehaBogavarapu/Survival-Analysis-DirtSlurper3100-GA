@@ -268,7 +268,7 @@ legend("topleft",
        fill = c("cadetblue", "coral"),
        inset = c(-0.02, -0.02),
        bty = "n")
-# Infrared Sensor fails when vacuum used less as opposed to battery and impact where more use corresponds to more failure
+# Impact Sensor shows best performance even when average usage times are being mapped,
 
 # Relation between Pets and Failure of Battery, Impact Status, Infrared Sensor
 battery_fail <- tapply(batterystatus == "Damage", pets, sum, na.rm = TRUE)
