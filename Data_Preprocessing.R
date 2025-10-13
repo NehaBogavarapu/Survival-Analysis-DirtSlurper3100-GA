@@ -2,7 +2,7 @@ library(tidyverse)
 library(lubridate)
 
 # Set path to CSV data file 
-file_path <- "D:\\TUE Study Material\\Q1\\Survival Analysis for Data Scientists\\GA_17\\Survival-Analysis-DirtSlurper3100-GA\\DirtSlurper3100.csv"
+file_path <- "C:/Users/20221564/Data_Science_and_Artificial_Intelligence/Survival-Analysis-DirtSlurper3100-GA/DirtSlurper3100.csv"
 
 # Load packages 
 
@@ -20,16 +20,17 @@ og_data <- read.table(file_path,
 # No failure date but damaged component:
 damage_but_no_failure_date_idx  <- which(og_data$Sent.for.repair == "YES" & og_data$Failure.date == "---")
 
-# All parts okay but there is a failure date (failure due to unobserved component):
-ok_parts_but_failure_idx <- which(
-  og_data$Battery.status == "OK" &
-    og_data$Impact.status == "OK" &
-    og_data$IR.status == "OK" &
-    og_data$Failure.date != "---"
-)
+# # All parts okay but there is a failure date (failure due to unobserved component - 64 entries):
+# ok_parts_but_failure_idx <- which(
+#   og_data$Battery.status == "OK" &
+#     og_data$Impact.status == "OK" &
+#     og_data$IR.status == "OK" &
+#     og_data$Failure.date != "---"
+# )
 
 # Convert the indices to a single vector of rows to drop
-rows_to_drop <- union(ok_parts_but_failure_idx, damage_but_no_failure_date_idx)
+# rows_to_drop <- union(ok_parts_but_failure_idx, damage_but_no_failure_date_idx)
+rows_to_drop <- damage_but_no_failure_date_idx
 
 # POSIX standard English locale 
 Sys.setlocale("LC_TIME", "C")  
