@@ -187,22 +187,6 @@ weibull_battery <- survreg(Surv(Possession.time, Battery.status) ~
                              Total.usage.time + Pets + Carpet.score,
                            data = data, dist = "weibull")
 
-# Batteries inference comparision to KM
-predict(
-  weibull_battery,
-  newdata = data.frame(Pets = 1, Carpet.score = mean(data$Carpet.score, na.rm = TRUE)),
-  type = "quantile",
-  p = 0.1
-)
-
-# If this differs from KM it means:
-  # Data might not be weibull shaped
-  # KM estimates survival empirically only up to the largest observed event time.
-  # If you have heavy right-censoring, the KM curve gets less precise at long times.
-  # The Weibull model, using parametric assumptions, can extrapolate beyond where the data are sparse — often producing higher (or lower) L₁₀ estimates.
-  # Covariate adjustment (?) - weibull is conditional on the covariates but km is marginal
-
-
 
 if (weibull_battery$iter >= 30) {
   cat("WARNING: Model reached iteration limit.\n\n")
