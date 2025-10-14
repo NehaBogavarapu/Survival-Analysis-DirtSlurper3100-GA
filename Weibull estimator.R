@@ -126,8 +126,7 @@ print(aic_comparison_impact)
     # Pets consistently affect survival across models; Carpet score effect is small and sometimes negligible.
     # Right censoring handled properly: devices without failure dates were treated as censored, which allows correct likelihood calculation.
 
-<<<<<<< HEAD
-=======
+
 # Key Takeaways
 # Non-convergence in Weibull for impact sensor suggests insufficient failure events (models require enough events for stable estimation)
 # Pets consistently affect survival across models; Carpet score effect is small and sometimes negligible.
