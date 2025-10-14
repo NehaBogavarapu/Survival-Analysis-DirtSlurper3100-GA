@@ -69,6 +69,7 @@ data <- og_data %>%
     
     # New variable: Possession time in hours
     Possession.time = as.numeric(difftime(Failure.date, Registration.date, units = "hours"))
+    Possession.time = as.numeric(difftime(Failure.date, Registration.date, units = "days"))
     
   ) %>%
   filter(Total.usage.time > 0)  # Remove invalid survival times (these were devices registered on the last day of the study)
