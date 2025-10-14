@@ -299,6 +299,76 @@ cat("Result:", ifelse(p_val2 < 0.05, "Weibull PREFERRED", "Exponential adequate"
 cat("\nAIC Comparison:\n")
 print(AIC(exp_battery, weibull_battery))
 
+# Test 1: Impact - Are covariates significant?
+cat("\n--- Test 1: Impact Covariates ---\n")
+weibull_impact_null <- survreg(Surv(Possession.time , Impact.status) ~ 1 + Total.usage.time + Pets + Carpet.score,,
+                                data = data, dist = "weibull")
+
+if (weibull_impact$loglik[2] > weibull_impact_null$loglik[2]) {
+  cat("WARNING: Convergence issue detected\n")
+  LRT1 <- 2 * abs(weibull_impact$loglik[2] - weibull_impact_null$loglik[2])
+} else {
+  LRT1 <- 2 * (weibull_impact$loglik[2] - weibull_impact_null$loglik[2])
+}
+
+p_val1 <- 1 - pchisq(abs(LRT1), df = 3)  # 3 covariates now
+
+cat("LRT statistic:", abs(LRT1), "\n")
+cat("df: 3\n")
+cat("p-value:", format.pval(p_val1), "\n")
+cat("Result:", ifelse(p_val1 < 0.05, "Covariates SIGNIFICANT", "Not significant"), "\n")
+
+# Test 2: Impact - Weibull vs Exponential
+cat("\n--- Test 2: Impact Distribution ---\n")
+exp_impact <- survreg(Surv(Possession.time , Impact.status) ~ 
+                         Total.usage.time + Pets + Carpet.score,
+                       data = data, dist = "exponential")
+LRT2 <- 2 * abs(weibull_impact$loglik[2] - exp_impact$loglik[2])
+p_val2 <- 1 - pchisq(LRT2, df = 1)
+
+cat("LRT statistic:", LRT2, "\n")
+cat("p-value:", format.pval(p_val2), "\n")
+cat("Result:", ifelse(p_val2 < 0.05, "Weibull PREFERRED", "Exponential adequate"), "\n")
+
+# Model comparison
+cat("\nAIC Comparison:\n")
+print(AIC(exp_impact, weibull_impact))
+
+# Test 1: IR - Are covariates significant?
+cat("\n--- Test 1: IR Covariates ---\n")
+weibull_ir_null <- survreg(Surv(Possession.time , IR.status) ~ 1 + Total.usage.time + Pets + Carpet.score,,
+                               data = data, dist = "weibull")
+
+if (weibull_ir$loglik[2] > weibull_ir_null$loglik[2]) {
+  cat("WARNING: Convergence issue detected\n")
+  LRT1 <- 2 * abs(weibull_ir$loglik[2] - weibull_ir_null$loglik[2])
+} else {
+  LRT1 <- 2 * (weibull_ir$loglik[2] - weibull_ir_null$loglik[2])
+}
+
+p_val1 <- 1 - pchisq(abs(LRT1), df = 3)  # 3 covariates now
+
+cat("LRT statistic:", abs(LRT1), "\n")
+cat("df: 3\n")
+cat("p-value:", format.pval(p_val1), "\n")
+cat("Result:", ifelse(p_val1 < 0.05, "Covariates SIGNIFICANT", "Not significant"), "\n")
+
+# Test 2: IR - Weibull vs Exponential
+cat("\n--- Test 2: IR Distribution ---\n")
+exp_ir <- survreg(Surv(Possession.time , IR.status) ~ 
+                        Total.usage.time + Pets + Carpet.score,
+                      data = data, dist = "exponential")
+LRT2 <- 2 * abs(weibull_ir$loglik[2] - exp_ir$loglik[2])
+p_val2 <- 1 - pchisq(LRT2, df = 1)
+
+cat("LRT statistic:", LRT2, "\n")
+cat("p-value:", format.pval(p_val2), "\n")
+cat("Result:", ifelse(p_val2 < 0.05, "Weibull PREFERRED", "Exponential adequate"), "\n")
+
+# Model comparison
+cat("\nAIC Comparison:\n")
+print(AIC(exp_ir, weibull_ir))
+
 # ============================================================================
 # 4. RESIDUAL ANALYSIS - DETAILED EXPLANATION
 # ============================================================================
@@ -315,7 +385,7 @@ analyze_residuals_detailed <- function(model, data, event_col, time_col, comp_na
   scale_param <- model$scale         # Scale parameter
   shape_param <- 1 / scale_param     # Shape = 1/scale for survreg
   event <- data[[event_col]]
-  #time_days <- data[[time_col]] / 24
+  time_days <- data[[time_col]]
   
   cat("Model type:", model$dist, "\n")
   cat("Shape parameter (k):", round(shape_param, 3), "\n")
@@ -911,7 +981,7 @@ if (p_battery_carpet < 0.05) {
   cat("  • Battery: Carpet coverage significantly affects survival\n")
 }
 if (p_ir_carpet < 0.05) {
-  cat("  • IR Sensor: Carpet coverage significantly affects survival\n")
+  cat("  • IR Sensor: Carpet coverage significantly affFects survival\n")
 }
 if (p_impact_carpet < 0.05) {
   cat("  • Impact Sensor: Carpet coverage significantly affects survival\n")
