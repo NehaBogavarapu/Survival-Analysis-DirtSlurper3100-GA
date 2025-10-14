@@ -18,11 +18,11 @@ data <- read.table(file_path,
 
 # Weibull ----------------------------------------------------------------------
 # Models
-weibull_battery <- survreg(Surv(Possession.time, Battery.status) ~ Pets + Carpet.score,
+weibull_battery <- survreg(Surv(Possession.time, Battery.status) ~ Pets + Carpet.score + Total.usage.time,
                            data = data, dist = "weibull")
-weibull_impact <- survreg(Surv(Possession.time, Impact.status) ~ Pets + Carpet.score,
+weibull_impact <- survreg(Surv(Possession.time, Impact.status) ~ Pets + Carpet.score + Total.usage.time,
                           data = data, dist = "weibull")
-weibull_ir <- survreg(Surv(Possession.time, IR.status) ~ Pets + Carpet.score,
+weibull_ir <- survreg(Surv(Possession.time, IR.status) ~ Pets + Carpet.score + Total.usage.time,
                       data = data, dist = "weibull")
 
 # Model summaries
@@ -63,11 +63,11 @@ summary(weibull_ir)
 
 # Exponential ------------------------------------------------------------------
 # Models
-exp_battery <- survreg(Surv(Possession.time, Battery.status) ~ Pets + Carpet.score,
+exp_battery <- survreg(Surv(Possession.time, Battery.status) ~ Pets + Carpet.score + Total.usage.time,
                        data = data, dist = "exponential")
-exp_impact <- survreg(Surv(Possession.time, Impact.status) ~ Pets + Carpet.score ,
+exp_impact <- survreg(Surv(Possession.time, Impact.status) ~ Pets + Carpet.score + Total.usage.time ,
                       data = data, dist = "exponential")
-exp_ir <- survreg(Surv(Possession.time, IR.status) ~ Pets + Carpet.score,
+exp_ir <- survreg(Surv(Possession.time, IR.status) ~ Pets + Carpet.score + Total.usage.time,
                   data = data, dist = "exponential")
 
 # Model summaries
@@ -188,6 +188,23 @@ cat("--- BATTERY (Weibull) ---\n")
 weibull_battery <- survreg(Surv(Possession.time / 24, Battery.status) ~ 
                              Total.usage.time + Pets + Carpet.score,
                            data = data, dist = "weibull")
+
+# Batteries inference comparision to KM
+predict(
+  weibull_battery,
+  newdata = data.frame(Pets = 1, Carpet.score = mean(data$Carpet.score, na.rm = TRUE)),
+  type = "quantile",
+  p = 0.1
+)
+
+# If this differs from KM it means:
+  # Data might not be weibull shaped
+  # KM estimates survival empirically only up to the largest observed event time.
+  # If you have heavy right-censoring, the KM curve gets less precise at long times.
+  # The Weibull model, using parametric assumptions, can extrapolate beyond where the data are sparse — often producing higher (or lower) L₁₀ estimates.
+  # Covariate adjustment (?) - weibull is conditional on the covariates but km is marginal
+
+
 
 if (weibull_battery$iter >= 30) {
   cat("WARNING: Model reached iteration limit.\n\n")
@@ -507,4 +524,4 @@ resid_ir <- analyze_residuals_detailed(weibull_ir, data,
 resid_impact <- analyze_residuals_detailed(impact_model, data,
                                            "Impact.status", "Possession.time",
                                            "IMPACT SENSOR")
->>>>>>> f752491f6ac575ce788b6054f7f464e9290a2fd0
+# >>>>>>> f752491f6ac575ce788b6054f7f464e9290a2fd0
