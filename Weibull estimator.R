@@ -12,7 +12,7 @@ data <- read.table(file_path,
                       sep = ",",
                       stringsAsFactors = FALSE)
 
-# View(data)
+# View(data).
 
 # The models use status as event indicator: 1 means failure (Damage), 0 means censored (OK)
 
