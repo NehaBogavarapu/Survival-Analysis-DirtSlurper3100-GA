@@ -18,11 +18,11 @@ data <- read.table(file_path,
 
 # Weibull ----------------------------------------------------------------------
 # Models
-weibull_battery <- survreg(Surv(Possession.time, Battery.status) ~ Pets + Carpet.score,
+weibull_battery <- survreg(Surv(Possession.time, Battery.status) ~ Pets + Carpet.score+Total.usage.time,
                            data = data, dist = "weibull")
-weibull_impact <- survreg(Surv(Possession.time, Impact.status) ~ Pets + Carpet.score,
+weibull_impact <- survreg(Surv(Possession.time, Impact.status) ~ Pets + Carpet.score+ Total.usage.time,
                           data = data, dist = "weibull")
-weibull_ir <- survreg(Surv(Possession.time, IR.status) ~ Pets + Carpet.score,
+weibull_ir <- survreg(Surv(Possession.time, IR.status) ~ Pets + Carpet.score+ Total.usage.time,
                       data = data, dist = "weibull")
 
 # Model summaries
