@@ -39,10 +39,8 @@ time_infraredsensor <- ifelse(!is.na(failuredate) & data$IR.status == 1,
                               as.numeric(difftime(study_end, reg, units="days")))
 event_infraredsensor <- ifelse(data$IR.status == 1, 1, 0)
 
-# setting up parameters for analysing survival of Whole Vacuum (fails if ANY component fails) 
-event_vacuum <- ifelse((data$Battery.status == 1 |
-                          data$Impact.status == 1 |
-                          data$IR.status == 1), 1, 0)
+# setting up parameters for analysing survival of Whole Vacuum (fails if ANY component fails), i.e has a failure date
+event_vacuum <- ifelse(!is.na(failuredate), 1, 0)
 
 time_vacuum <- ifelse(event_vacuum == 1 & !is.na(failuredate),
                       as.numeric(difftime(failuredate, reg, units="days")),
@@ -113,7 +111,7 @@ surv_times <- km_summary$time
 quantile_10 <- min(surv_times[surv_probs <= 0.90])
 # Print the result
 cat("Estimated 10% quantile for battery that works less than 2400 hrs :", quantile_10, "\n")
-#Ans is 1001 days so yes it works well
+#Ans is 1008 days so yes it works well
 #--------------------------------------------------------------------------------------#
 #Analysing Inference two(b)
 #Battery that works for greater than 2400 hours sent for repair or not
@@ -142,7 +140,7 @@ text(x = bp,
      labels = rbind(ok_notsent, fail_sent), 
      pos = 1)  
 #pos# Determines position of text to the top of the bar
-#So there are 228 such batteries with charge less than 80%
+#So there are 238 such batteries with charge less than 80%
 #Analysis Inference Two can be done with the fist ig
 #---------------------------------------------------------------------------#
 
@@ -160,7 +158,7 @@ quantile_10 <- min(surv_times[surv_probs <= 0.90])
 cat("Estimated 10% quantile for infrared Sensor :", quantile_10, "\n") #ans is infinity so yes
 #This means less than 10% of the IR sensors actually failed within the follow-up window.
 #Hence, we cannot estimate L10 from KM, because there aren't enough failures to reach that 10% failure threshold.
-#for 0.95 there are 1059 days
+
 #-------------------------------------------------------------#
 # Overall Extract survival probabilities and corresponding times of battery overall
 km_summary <- summary(km_battery)
@@ -170,7 +168,7 @@ surv_times <- km_summary$time
 quantile_10 <- min(surv_times[surv_probs <= 0.90])
 # Print the result
 cat("Estimated 10% quantile :", quantile_10, "\n")
-# Our estimate that battery parts survive 936 days (general not asked anywhere)
+# Our estimate that battery parts survive 945 days (general not asked anywhere)
 #--------------------------------------------------------------#
   # Overall Extract survival probabilities and corresponding times of impact sensor
   #infinity at 90
@@ -181,4 +179,4 @@ surv_times <- km_summary$time
 quantile_5 <- min(surv_times[surv_probs <= 0.95])
 # Print the result
 cat("Estimated 5% quantile :", quantile_5, "\n")
-#Works very well and can last 1615 days L95 i.e ~1600 days.
+#Works very well and can last 1618 days L95 i.e ~1600 days.

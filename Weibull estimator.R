@@ -12,7 +12,7 @@ data <- read.table(file_path,
                       sep = ",",
                       stringsAsFactors = FALSE)
 
-# View(data)
+# View(data).
 
 # The models use status as event indicator: 1 means failure (Damage), 0 means censored (OK)
 
@@ -126,8 +126,6 @@ print(aic_comparison_impact)
     # Pets consistently affect survival across models; Carpet score effect is small and sometimes negligible.
     # Right censoring handled properly: devices without failure dates were treated as censored, which allows correct likelihood calculation.
 
-<<<<<<< HEAD
-=======
 # Key Takeaways
 # Non-convergence in Weibull for impact sensor suggests insufficient failure events (models require enough events for stable estimation)
 # Pets consistently affect survival across models; Carpet score effect is small and sometimes negligible.
@@ -147,7 +145,7 @@ data <- data %>%
 
 # Battery - using POSSESSION TIME as time scale
 cat("\n--- BATTERY ---\n")
-surv_battery <- Surv(data$Possession.time / 24, data$Battery.status)  # Convert to days
+surv_battery <- Surv(data$Possession.time, data$Battery.status)  # Convert to days
 logrank_battery <- survdiff(surv_battery ~ extreme_use, data = data)
 print(logrank_battery)
 cat("p-value:", format.pval(1 - pchisq(logrank_battery$chisq, 1)), "\n")
@@ -162,14 +160,14 @@ ggsurvplot(fit_battery, data = data,
 
 # IR Sensor
 cat("\n--- IR SENSOR ---\n")
-surv_ir <- Surv(data$Possession.time / 24, data$IR.status)
+surv_ir <- Surv(data$Possession.time, data$IR.status)
 logrank_ir <- survdiff(surv_ir ~ extreme_use, data = data)
 print(logrank_ir)
 cat("p-value:", format.pval(1 - pchisq(logrank_ir$chisq, 1)), "\n")
 
 # Impact Sensor
 cat("\n--- IMPACT SENSOR ---\n")
-surv_impact <- Surv(data$Possession.time / 24, data$Impact.status)
+surv_impact <- Surv(data$Possession.time, data$Impact.status)
 logrank_impact <- survdiff(surv_impact ~ extreme_use, data = data)
 print(logrank_impact)
 cat("p-value:", format.pval(1 - pchisq(logrank_impact$chisq, 1)), "\n")
@@ -185,7 +183,7 @@ cat("Covariates: Usage intensity (Total.usage.time), Pets, Carpet.score\n\n")
 
 # Battery - Weibull
 cat("--- BATTERY (Weibull) ---\n")
-weibull_battery <- survreg(Surv(Possession.time / 24, Battery.status) ~ 
+weibull_battery <- survreg(Surv(Possession.time, Battery.status) ~ 
                              Total.usage.time + Pets + Carpet.score,
                            data = data, dist = "weibull")
 
@@ -247,7 +245,7 @@ for (i in 2:(nrow(coef_summary)-1)) {
 
 # IR Sensor - Weibull
 cat("\n--- IR SENSOR (Weibull) ---\n")
-weibull_ir <- survreg(Surv(Possession.time / 24, IR.status) ~ 
+weibull_ir <- survreg(Surv(Possession.time , IR.status) ~ 
                         Total.usage.time + Pets + Carpet.score,
                       data = data, dist = "weibull")
 summary(weibull_ir)
@@ -259,14 +257,14 @@ cat("\nShape (k):", round(k_ir, 3), "\n")
 # Impact Sensor - Try Weibull first
 cat("\n--- IMPACT SENSOR ---\n")
 weibull_impact <- tryCatch({
-  survreg(Surv(Possession.time / 24, Impact.status) ~ 
+  survreg(Surv(Possession.time , Impact.status) ~ 
             Total.usage.time + Pets + Carpet.score,
           data = data, dist = "weibull")
 }, error = function(e) NULL)
 
 if (is.null(weibull_impact) || any(is.na(coef(weibull_impact)))) {
   cat("Weibull failed. Using Exponential.\n")
-  exp_impact <- survreg(Surv(Possession.time / 24, Impact.status) ~ 
+  exp_impact <- survreg(Surv(Possession.time , Impact.status) ~ 
                           Total.usage.time + Pets + Carpet.score,
                         data = data, dist = "exponential")
   summary(exp_impact)
@@ -284,7 +282,7 @@ cat("\n\n=== LIKELIHOOD RATIO TESTS ===\n")
 
 # Test 1: Battery - Are covariates significant?
 cat("\n--- Test 1: Battery Covariates ---\n")
-weibull_battery_null <- survreg(Surv(Possession.time / 24, Battery.status) ~ 1,
+weibull_battery_null <- survreg(Surv(Possession.time , Battery.status) ~ 1,
                                 data = data, dist = "weibull")
 
 if (weibull_battery$loglik[2] > weibull_battery_null$loglik[2]) {
@@ -303,7 +301,7 @@ cat("Result:", ifelse(p_val1 < 0.05, "Covariates SIGNIFICANT", "Not significant"
 
 # Test 2: Battery - Weibull vs Exponential
 cat("\n--- Test 2: Battery Distribution ---\n")
-exp_battery <- survreg(Surv(Possession.time / 24, Battery.status) ~ 
+exp_battery <- survreg(Surv(Possession.time , Battery.status) ~ 
                          Total.usage.time + Pets + Carpet.score,
                        data = data, dist = "exponential")
 LRT2 <- 2 * abs(weibull_battery$loglik[2] - exp_battery$loglik[2])
@@ -333,7 +331,7 @@ analyze_residuals_detailed <- function(model, data, event_col, time_col, comp_na
   scale_param <- model$scale         # Scale parameter
   shape_param <- 1 / scale_param     # Shape = 1/scale for survreg
   event <- data[[event_col]]
-  time_days <- data[[time_col]] / 24
+  #time_days <- data[[time_col]] / 24
   
   cat("Model type:", model$dist, "\n")
   cat("Shape parameter (k):", round(shape_param, 3), "\n")
@@ -359,7 +357,7 @@ analyze_residuals_detailed <- function(model, data, event_col, time_col, comp_na
   cat("Range: [", round(min(cox_snell[is.finite(cox_snell)], na.rm = TRUE), 3),
       ",", round(max(cox_snell[is.finite(cox_snell)], na.rm = TRUE), 3), "]\n")
   cat("Mean:", round(mean(cox_snell[is.finite(cox_snell)], na.rm = TRUE), 3),
-      "(should be ≈1 if Exp(1))\n\n")
+      "(should be approx. 1 if Exp(1))\n\n")
   
   # -------------------------------------------------------------------------
   # 2. MARTINGALE-LIKE RESIDUALS
@@ -524,4 +522,450 @@ resid_ir <- analyze_residuals_detailed(weibull_ir, data,
 resid_impact <- analyze_residuals_detailed(impact_model, data,
                                            "Impact.status", "Possession.time",
                                            "IMPACT SENSOR")
+<<<<<<< HEAD
 # >>>>>>> f752491f6ac575ce788b6054f7f464e9290a2fd0
+=======
+# ============================================================================
+# 5. ADDITIONAL ANALYSES FOR SPECIFICATION CHECKS
+# Testing individual covariate effects for warranty considerations
+# ============================================================================
+
+cat("\n\n═══════════════════════════════════════════════\n")
+cat("ADDITIONAL ANALYSES: PETS & CARPET EFFECTS\n")
+cat("═══════════════════════════════════════════════\n\n")
+
+# ============================================================================
+# 5.1 LOG-RANK TESTS FOR PETS EFFECT (All Components)
+# ============================================================================
+
+cat("─────────────────────────────────────────────────\n")
+cat("LOG-RANK TEST: PETS EFFECT ON SURVIVAL\n")
+cat("─────────────────────────────────────────────────\n")
+cat("Research question: Does pet ownership affect component survival?\n")
+cat("Implication: Should warranties differentiate by pet ownership?\n\n")
+
+# Create factor for pets
+data <- data %>%
+  mutate(Pets_factor = factor(Pets, levels = c(0, 1), labels = c("No Pets", "Has Pets")))
+
+# Battery - Pets effect
+cat("BATTERY - Pets Effect\n")
+surv_battery_pets <- Surv(data$Possession.time , data$Battery.status)
+logrank_battery_pets <- survdiff(surv_battery_pets ~ Pets_factor, data = data)
+print(logrank_battery_pets)
+
+p_battery_pets <- 1 - pchisq(logrank_battery_pets$chisq, 1)
+cat("\np-value:", format.pval(p_battery_pets), "\n")
+cat("Interpretation:", 
+    ifelse(p_battery_pets < 0.05, 
+           "SIGNIFICANT - Pet ownership affects battery survival", 
+           "Not significant"), "\n")
+
+# Direction of effect
+obs_pets <- logrank_battery_pets$obs[logrank_battery_pets$n > 0]
+exp_pets <- logrank_battery_pets$exp[logrank_battery_pets$n > 0]
+if (length(obs_pets) == 2) {
+  if (obs_pets[2] < exp_pets[2]) {
+    cat("Direction: Pets are PROTECTIVE (fewer failures than expected)\n")
+  } else {
+    cat("Direction: Pets are HARMFUL (more failures than expected)\n")
+  }
+}
+cat("\n")
+
+# IR Sensor - Pets effect
+cat("IR SENSOR - Pets Effect\n")
+surv_ir_pets <- Surv(data$Possession.time , data$IR.status)
+logrank_ir_pets <- survdiff(surv_ir_pets ~ Pets_factor, data = data)
+print(logrank_ir_pets)
+
+p_ir_pets <- 1 - pchisq(logrank_ir_pets$chisq, 1)
+cat("\np-value:", format.pval(p_ir_pets), "\n")
+cat("Interpretation:", 
+    ifelse(p_ir_pets < 0.05, 
+           "SIGNIFICANT - Pet ownership affects IR sensor survival", 
+           "Not significant"), "\n\n")
+
+# Impact Sensor - Pets effect
+cat("IMPACT SENSOR - Pets Effect\n")
+surv_impact_pets <- Surv(data$Possession.time , data$Impact.status)
+logrank_impact_pets <- survdiff(surv_impact_pets ~ Pets_factor, data = data)
+print(logrank_impact_pets)
+
+p_impact_pets <- 1 - pchisq(logrank_impact_pets$chisq, 1)
+cat("\np-value:", format.pval(p_impact_pets), "\n")
+cat("Interpretation:", 
+    ifelse(p_impact_pets < 0.05, 
+           "SIGNIFICANT - Pet ownership affects impact sensor survival", 
+           "Not significant"), "\n")
+
+# Direction of effect for Impact
+obs_pets_impact <- logrank_impact_pets$obs[logrank_impact_pets$n > 0]
+exp_pets_impact <- logrank_impact_pets$exp[logrank_impact_pets$n > 0]
+if (length(obs_pets_impact) == 2) {
+  if (obs_pets_impact[2] < exp_pets_impact[2]) {
+    cat("Direction: Pets are PROTECTIVE (fewer failures than expected)\n")
+  } else {
+    cat("Direction: Pets are HARMFUL (more failures than expected)\n")
+  }
+}
+cat("\n")
+
+# ============================================================================
+# 5.2 LOG-RANK TESTS FOR CARPET EFFECT (All Components)
+# ============================================================================
+
+cat("─────────────────────────────────────────────────\n")
+cat("LOG-RANK TEST: CARPET SCORE EFFECT ON SURVIVAL\n")
+cat("─────────────────────────────────────────────────\n")
+cat("Research question: Does carpet coverage affect component survival?\n")
+cat("Note: Grouping carpet scores into Low/Medium/High for testing\n\n")
+
+# Create carpet groups (Low: 1-3, Medium: 4-6, High: 7-9)
+data <- data %>%
+  mutate(Carpet_group = cut(Carpet.score, 
+                            breaks = c(0, 3, 6, 9),
+                            labels = c("Low (1-3)", "Medium (4-6)", "High (7-9)"),
+                            include.lowest = TRUE))
+
+# Battery - Carpet effect
+cat("BATTERY - Carpet Effect\n")
+logrank_battery_carpet <- survdiff(surv_battery_pets ~ Carpet_group, data = data)
+print(logrank_battery_carpet)
+
+p_battery_carpet <- 1 - pchisq(logrank_battery_carpet$chisq, df = 2)
+cat("\np-value:", format.pval(p_battery_carpet), "\n")
+cat("Interpretation:", 
+    ifelse(p_battery_carpet < 0.05, 
+           "SIGNIFICANT - Carpet coverage affects battery survival", 
+           "Not significant"), "\n\n")
+
+# IR Sensor - Carpet effect
+cat("IR SENSOR - Carpet Effect\n")
+logrank_ir_carpet <- survdiff(surv_ir_pets ~ Carpet_group, data = data)
+print(logrank_ir_carpet)
+
+p_ir_carpet <- 1 - pchisq(logrank_ir_carpet$chisq, df = 2)
+cat("\np-value:", format.pval(p_ir_carpet), "\n")
+cat("Interpretation:", 
+    ifelse(p_ir_carpet < 0.05, 
+           "SIGNIFICANT - Carpet coverage affects IR sensor survival", 
+           "Not significant"), "\n\n")
+
+# Impact Sensor - Carpet effect
+cat("IMPACT SENSOR - Carpet Effect\n")
+logrank_impact_carpet <- survdiff(surv_impact_pets ~ Carpet_group, data = data)
+print(logrank_impact_carpet)
+
+p_impact_carpet <- 1 - pchisq(logrank_impact_carpet$chisq, df = 2)
+cat("\np-value:", format.pval(p_impact_carpet), "\n")
+cat("Interpretation:", 
+    ifelse(p_impact_carpet < 0.05, 
+           "SIGNIFICANT - Carpet coverage affects impact sensor survival", 
+           "Not significant"), "\n\n")
+
+# ============================================================================
+# 5.3 MANUFACTURER SPECIFICATIONS CHECK
+# ============================================================================
+
+cat("═══════════════════════════════════════════════\n")
+cat("MANUFACTURER SPECIFICATIONS VERIFICATION\n")
+cat("═══════════════════════════════════════════════\n\n")
+
+# Define median usage for predictions
+median_usage <- median(data$Total.usage.time, na.rm = TRUE)
+cat("Reference conditions:\n")
+cat("  Usage intensity:", round(median_usage, 1), "hours (median)\n")
+cat("  Pets: No\n")
+cat("  Carpet score: 5 (medium)\n\n")
+
+# ---- IR SENSOR ----
+cat("─────────────────────────────────────────────────\n")
+cat("IR SENSOR: L10 >= 2,000 days\n")
+cat("─────────────────────────────────────────────────\n")
+
+L10_ir <- predict(weibull_ir,
+                  newdata = data.frame(
+                    Total.usage.time = median_usage,
+                    Pets = 0,
+                    Carpet.score = 5
+                  ),
+                  type = "quantile", p = 0.1)
+
+L50_ir <- predict(weibull_ir,
+                  newdata = data.frame(
+                    Total.usage.time = median_usage,
+                    Pets = 0,
+                    Carpet.score = 5
+                  ),
+                  type = "quantile", p = 0.5)
+
+cat("Estimated L10:", round(L10_ir, 1), "days\n")
+cat("Estimated L50 (median):", round(L50_ir, 1), "days\n")
+cat("Manufacturer guarantee: >=2,000 days\n\n")
+
+if (L10_ir >= 2000) {
+  cat("SPECIFICATION MET\n")
+  cat("   Exceeds requirement by", round(L10_ir - 2000, 1), "days\n\n")
+} else {
+  cat("SPECIFICATION VIOLATED\n")
+  cat("   Falls short by", round(2000 - L10_ir, 1), "days\n")
+  cat("   Performance ratio:", round(L10_ir / 2000 * 100, 1), "% of guarantee\n\n")
+}
+
+# ---- BATTERY ----
+cat("─────────────────────────────────────────────────\n")
+cat("BATTERY: L10 >= 1,000 days (excluding extreme use >= 2,400h)\n")
+cat("─────────────────────────────────────────────────\n")
+
+# Filter to normal use only
+data_normal <- data %>% filter(Total.usage.time < 2400)
+median_usage_normal <- median(data_normal$Total.usage.time, na.rm = TRUE)
+
+cat("Normal use dataset: n =", nrow(data_normal), "\n")
+cat("Median usage (normal):", round(median_usage_normal, 1), "hours\n\n")
+
+# Fit model on normal use data
+weibull_battery_normal <- tryCatch({
+  survreg(Surv(Possession.time , Battery.status) ~
+            Total.usage.time + Pets + Carpet.score,
+          data = data_normal, dist = "weibull")
+}, warning = function(w) {
+  cat("Warning:", conditionMessage(w), "\n")
+  survreg(Surv(Possession.time , Battery.status) ~
+            Total.usage.time + Pets + Carpet.score,
+          data = data_normal, dist = "weibull")
+})
+
+L10_battery <- predict(weibull_battery_normal,
+                       newdata = data.frame(
+                         Total.usage.time = median_usage_normal,
+                         Pets = 0,
+                         Carpet.score = 5
+                       ),
+                       type = "quantile", p = 0.1)
+
+L50_battery <- predict(weibull_battery_normal,
+                       newdata = data.frame(
+                         Total.usage.time = median_usage_normal,
+                         Pets = 0,
+                         Carpet.score = 5
+                       ),
+                       type = "quantile", p = 0.5)
+
+cat("Estimated L10:", round(L10_battery, 1), "days\n")
+cat("Estimated L50 (median):", round(L50_battery, 1), "days\n")
+cat("Manufacturer guarantee: >= 1,000 days\n\n")
+
+if (L10_battery >= 1000) {
+  cat("SPECIFICATION MET\n")
+  cat("   Exceeds requirement by", round(L10_battery - 1000, 1), "days\n\n")
+} else {
+  cat("SPECIFICATION VIOLATED\n")
+  cat("   Falls short by", round(1000 - L10_battery, 1), "days\n")
+  cat("   Performance ratio:", round(L10_battery / 1000 * 100, 1), "% of guarantee\n\n")
+}
+
+# ---- IMPACT SENSOR ----
+cat("─────────────────────────────────────────────────\n")
+cat("IMPACT SENSOR: Recommended Specifications\n")
+cat("─────────────────────────────────────────────────\n")
+cat("(IButler in-house component - setting warranty terms)\n\n")
+
+L10_impact <- predict(impact_model,
+                      newdata = data.frame(
+                        Total.usage.time = median_usage,
+                        Pets = 0,
+                        Carpet.score = 5
+                      ),
+                      type = "quantile", p = 0.1)
+
+L50_impact <- predict(impact_model,
+                      newdata = data.frame(
+                        Total.usage.time = median_usage,
+                        Pets = 0,
+                        Carpet.score = 5
+                      ),
+                      type = "quantile", p = 0.5)
+
+L90_impact <- predict(impact_model,
+                      newdata = data.frame(
+                        Total.usage.time = median_usage,
+                        Pets = 0,
+                        Carpet.score = 5
+                      ),
+                      type = "quantile", p = 0.9)
+
+cat("Current Performance (reference conditions):\n")
+cat("   L10:", round(L10_impact, 0), "days\n")
+cat("   L50:", round(L50_impact, 0), "days\n")
+cat("   L90:", round(L90_impact, 0), "days\n\n")
+
+# Test if pets/carpet should affect warranty
+cat("IMPACT SENSOR WARRANTY CONSIDERATIONS:\n\n")
+
+cat("1. Should warranties differ by pet ownership?\n")
+cat("   Log-rank test p-value:", format.pval(p_impact_pets), "\n")
+if (p_impact_pets < 0.05) {
+  cat("YES: Pets significantly affect impact sensor survival\n")
+  cat("Consider differentiated warranty terms\n\n")
+  
+  # Calculate L10 for pets vs no pets
+  L10_impact_no_pets <- predict(impact_model,
+                                newdata = data.frame(
+                                  Total.usage.time = median_usage,
+                                  Pets = 0,
+                                  Carpet.score = 5
+                                ),
+                                type = "quantile", p = 0.1)
+  
+  L10_impact_with_pets <- predict(impact_model,
+                                  newdata = data.frame(
+                                    Total.usage.time = median_usage,
+                                    Pets = 1,
+                                    Carpet.score = 5
+                                  ),
+                                  type = "quantile", p = 0.1)
+  
+  cat("   L10 without pets:", round(L10_impact_no_pets, 0), "days\n")
+  cat("   L10 with pets:", round(L10_impact_with_pets, 0), "days\n")
+  cat("   Difference:", round(L10_impact_no_pets - L10_impact_with_pets, 0), "days\n\n")
+} else {
+  cat("NO: Pets do not significantly affect survival\n")
+  cat("Single warranty term sufficient\n\n")
+}
+
+cat("2. Should warranties differ by carpet coverage?\n")
+cat("Log-rank test p-value:", format.pval(p_impact_carpet), "\n")
+if (p_impact_carpet < 0.05) {
+  cat("YES: Carpet coverage significantly affects survival\n")
+  cat("Consider differentiated warranty terms\n\n")
+  
+  # Calculate L10 for different carpet levels
+  L10_impact_low_carpet <- predict(impact_model,
+                                   newdata = data.frame(
+                                     Total.usage.time = median_usage,
+                                     Pets = 0,
+                                     Carpet.score = 2
+                                   ),
+                                   type = "quantile", p = 0.1)
+  
+  L10_impact_high_carpet <- predict(impact_model,
+                                    newdata = data.frame(
+                                      Total.usage.time = median_usage,
+                                      Pets = 0,
+                                      Carpet.score = 8
+                                    ),
+                                    type = "quantile", p = 0.1)
+  
+  cat("L10 low carpet (score=2):", round(L10_impact_low_carpet, 0), "days\n")
+  cat("L10 high carpet (score=8):", round(L10_impact_high_carpet, 0), "days\n")
+  cat("Difference:", round(L10_impact_low_carpet - L10_impact_high_carpet, 0), "days\n\n")
+} else {
+  cat("NO: Carpet coverage does not significantly affect survival\n")
+  cat("Single warranty term sufficient\n\n")
+}
+
+cat("RECOMMENDED SPECIFICATIONS for Impact Sensor:\n")
+cat("   Conservative guarantee: L10 >=", round(L10_impact * 0.9, 0), "days\n")
+cat("   Standard guarantee: L50 >=", round(L50_impact * 0.8, 0), "days\n\n")
+
+cat("Note: Only", sum(data$Impact.status), "failures in", nrow(data), 
+    "devices (", round(100 * mean(data$Impact.status), 2), "%)\n")
+cat("      Impact sensor shows excellent reliability\n\n")
+
+# ============================================================================
+# 5.4 SUMMARY: WARRANTY DIFFERENTIATION RECOMMENDATIONS
+# ============================================================================
+
+cat("═══════════════════════════════════════════════\n")
+cat("WARRANTY DIFFERENTIATION RECOMMENDATIONS\n")
+cat("═══════════════════════════════════════════════\n\n")
+
+# Create summary table
+warranty_summary <- data.frame(
+  Component = c("Battery", "IR Sensor", "Impact Sensor"),
+  Pets_pvalue = c(
+    format.pval(p_battery_pets),
+    format.pval(p_ir_pets),
+    format.pval(p_impact_pets)
+  ),
+  Pets_Effect = c(
+    ifelse(p_battery_pets < 0.05, "Significant", "Not significant"),
+    ifelse(p_ir_pets < 0.05, "Significant", "Not significant"),
+    ifelse(p_impact_pets < 0.05, "Significant", "Not significant")
+  ),
+  Carpet_pvalue = c(
+    format.pval(p_battery_carpet),
+    format.pval(p_ir_carpet),
+    format.pval(p_impact_carpet)
+  ),
+  Carpet_Effect = c(
+    ifelse(p_battery_carpet < 0.05, "Significant", "Not significant"),
+    ifelse(p_ir_carpet < 0.05, "Significant", "Not significant"),
+    ifelse(p_impact_carpet < 0.05, "Significant", "Not significant")
+  ),
+  stringsAsFactors = FALSE
+)
+
+print(warranty_summary)
+
+cat("\n")
+cat("INTERPRETATION:\n")
+cat("───────────────────────────────────────────────\n\n")
+
+cat("PETS EFFECT:\n")
+if (p_battery_pets < 0.05) {
+  cat("  • Battery: Pets significantly affect survival\n")
+}
+if (p_ir_pets < 0.05) {
+  cat("  • IR Sensor: Pets significantly affect survival\n")
+}
+if (p_impact_pets < 0.05) {
+  cat("  • Impact Sensor: Pets significantly affect survival\n")
+}
+
+cat("\nCARPET EFFECT:\n")
+if (p_battery_carpet < 0.05) {
+  cat("  • Battery: Carpet coverage significantly affects survival\n")
+}
+if (p_ir_carpet < 0.05) {
+  cat("  • IR Sensor: Carpet coverage significantly affects survival\n")
+}
+if (p_impact_carpet < 0.05) {
+  cat("  • Impact Sensor: Carpet coverage significantly affects survival\n")
+}
+
+cat("\nRECOMMENDATIONS:\n")
+cat("───────────────────────────────────────────────\n")
+
+# Battery recommendations
+cat("\n1. BATTERY:\n")
+if (p_battery_pets < 0.05 || p_battery_carpet < 0.05) {
+  cat("   Consider differentiated warranties based on:\n")
+  if (p_battery_pets < 0.05) cat("     - Pet ownership\n")
+  if (p_battery_carpet < 0.05) cat("     - Carpet coverage\n")
+} else {
+  cat("   Standard warranty terms sufficient\n")
+}
+
+# IR Sensor recommendations
+cat("\n2. IR SENSOR:\n")
+if (p_ir_pets < 0.05 || p_ir_carpet < 0.05) {
+  cat("   Consider differentiated warranties based on:\n")
+  if (p_ir_pets < 0.05) cat("     - Pet ownership\n")
+  if (p_ir_carpet < 0.05) cat("     - Carpet coverage\n")
+} else {
+  cat("   Standard warranty terms sufficient\n")
+}
+
+# Impact Sensor recommendations
+cat("\n3. IMPACT SENSOR:\n")
+if (p_impact_pets < 0.05 || p_impact_carpet < 0.05) {
+  cat("   Consider differentiated warranties based on:\n")
+  if (p_impact_pets < 0.05) cat("     - Pet ownership\n")
+  if (p_impact_carpet < 0.05) cat("     - Carpet coverage\n")
+} else {
+  cat("   Standard warranty terms sufficient\n")
+}
+>>>>>>> 5ce3801f5882e476f89c1ef420306c2d9d763cb2
