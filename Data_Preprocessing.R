@@ -68,7 +68,6 @@ data <- og_data %>%
     Impact.status = as.numeric(Impact.status %in% c("Damage")),
     
     # New variable: Possession time in hours
-    Possession.time = as.numeric(difftime(Failure.date, Registration.date, units = "hours"))
     Possession.time = as.numeric(difftime(Failure.date, Registration.date, units = "days"))
     
   ) %>%

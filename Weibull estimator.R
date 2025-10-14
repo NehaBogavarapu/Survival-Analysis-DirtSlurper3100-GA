@@ -12,7 +12,6 @@ data <- read.table(file_path,
                       sep = ",",
                       stringsAsFactors = FALSE)
 
-# View(data)
 # View(data).
 
 # The models use status as event indicator: 1 means failure (Damage), 0 means censored (OK)
@@ -150,7 +149,6 @@ data <- data %>%
 
 # Battery - using POSSESSION TIME as time scale
 cat("\n--- BATTERY ---\n")
-surv_battery <- Surv(data$Possession.time / 24, data$Battery.status)  # Convert to days
 surv_battery <- Surv(data$Possession.time, data$Battery.status)  # Convert to days
 logrank_battery <- survdiff(surv_battery ~ extreme_use, data = data)
 print(logrank_battery)
@@ -166,7 +164,6 @@ ggsurvplot(fit_battery, data = data,
 
 # IR Sensor
 cat("\n--- IR SENSOR ---\n")
-surv_ir <- Surv(data$Possession.time / 24, data$IR.status)
 surv_ir <- Surv(data$Possession.time, data$IR.status)
 logrank_ir <- survdiff(surv_ir ~ extreme_use, data = data)
 print(logrank_ir)
@@ -174,7 +171,6 @@ cat("p-value:", format.pval(1 - pchisq(logrank_ir$chisq, 1)), "\n")
 
 # Impact Sensor
 cat("\n--- IMPACT SENSOR ---\n")
-surv_impact <- Surv(data$Possession.time / 24, data$Impact.status)
 surv_impact <- Surv(data$Possession.time, data$Impact.status)
 logrank_impact <- survdiff(surv_impact ~ extreme_use, data = data)
 print(logrank_impact)
@@ -191,7 +187,6 @@ cat("Covariates: Usage intensity (Total.usage.time), Pets, Carpet.score\n\n")
 
 # Battery - Weibull
 cat("--- BATTERY (Weibull) ---\n")
-weibull_battery <- survreg(Surv(Possession.time / 24, Battery.status) ~ 
 weibull_battery <- survreg(Surv(Possession.time, Battery.status) ~ 
                              Total.usage.time + Pets + Carpet.score,
                            data = data, dist = "weibull")
@@ -237,7 +232,6 @@ for (i in 2:(nrow(coef_summary)-1)) {
 
 # IR Sensor - Weibull
 cat("\n--- IR SENSOR (Weibull) ---\n")
-weibull_ir <- survreg(Surv(Possession.time / 24, IR.status) ~ 
 weibull_ir <- survreg(Surv(Possession.time , IR.status) ~ 
                         Total.usage.time + Pets + Carpet.score,
                       data = data, dist = "weibull")
@@ -250,7 +244,6 @@ cat("\nShape (k):", round(k_ir, 3), "\n")
 # Impact Sensor - Try Weibull first
 cat("\n--- IMPACT SENSOR ---\n")
 weibull_impact <- tryCatch({
-  survreg(Surv(Possession.time / 24, Impact.status) ~ 
   survreg(Surv(Possession.time , Impact.status) ~ 
             Total.usage.time + Pets + Carpet.score,
           data = data, dist = "weibull")
@@ -258,7 +251,6 @@ weibull_impact <- tryCatch({
 
 if (is.null(weibull_impact) || any(is.na(coef(weibull_impact)))) {
   cat("Weibull failed. Using Exponential.\n")
-  exp_impact <- survreg(Surv(Possession.time / 24, Impact.status) ~ 
   exp_impact <- survreg(Surv(Possession.time , Impact.status) ~ 
                           Total.usage.time + Pets + Carpet.score,
                         data = data, dist = "exponential")
@@ -277,7 +269,6 @@ cat("\n\n=== LIKELIHOOD RATIO TESTS ===\n")
 
 # Test 1: Battery - Are covariates significant?
 cat("\n--- Test 1: Battery Covariates ---\n")
-weibull_battery_null <- survreg(Surv(Possession.time / 24, Battery.status) ~ 1,
 weibull_battery_null <- survreg(Surv(Possession.time , Battery.status) ~ 1,
                                 data = data, dist = "weibull")
 
@@ -297,7 +288,6 @@ cat("Result:", ifelse(p_val1 < 0.05, "Covariates SIGNIFICANT", "Not significant"
 
 # Test 2: Battery - Weibull vs Exponential
 cat("\n--- Test 2: Battery Distribution ---\n")
-exp_battery <- survreg(Surv(Possession.time / 24, Battery.status) ~ 
 exp_battery <- survreg(Surv(Possession.time , Battery.status) ~ 
                          Total.usage.time + Pets + Carpet.score,
                        data = data, dist = "exponential")
@@ -328,7 +318,6 @@ analyze_residuals_detailed <- function(model, data, event_col, time_col, comp_na
   scale_param <- model$scale         # Scale parameter
   shape_param <- 1 / scale_param     # Shape = 1/scale for survreg
   event <- data[[event_col]]
-  time_days <- data[[time_col]] / 24
   #time_days <- data[[time_col]] / 24
   
   cat("Model type:", model$dist, "\n")
@@ -355,7 +344,6 @@ analyze_residuals_detailed <- function(model, data, event_col, time_col, comp_na
   cat("Range: [", round(min(cox_snell[is.finite(cox_snell)], na.rm = TRUE), 3),
       ",", round(max(cox_snell[is.finite(cox_snell)], na.rm = TRUE), 3), "]\n")
   cat("Mean:", round(mean(cox_snell[is.finite(cox_snell)], na.rm = TRUE), 3),
-      "(should be ≈1 if Exp(1))\n\n")
       "(should be approx. 1 if Exp(1))\n\n")
   
   # -------------------------------------------------------------------------
@@ -521,7 +509,6 @@ resid_ir <- analyze_residuals_detailed(weibull_ir, data,
 resid_impact <- analyze_residuals_detailed(impact_model, data,
                                            "Impact.status", "Possession.time",
                                            "IMPACT SENSOR")
->>>>>>> f752491f6ac575ce788b6054f7f464e9290a2fd0
 # ============================================================================
 # 5. ADDITIONAL ANALYSES FOR SPECIFICATION CHECKS
 # Testing individual covariate effects for warranty considerations
