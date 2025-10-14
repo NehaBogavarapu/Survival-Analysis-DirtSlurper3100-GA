@@ -4,7 +4,8 @@ library(survminer)
 
 
 # Set path to CSV data file 
-file_path <- "C:/Users/20221564/Data_Science_and_Artificial_Intelligence/Survival-Analysis-DirtSlurper3100-GA/data_preprocessed.csv"
+#file_path <- "C:/Users/20221564/Data_Science_and_Artificial_Intelligence/Survival-Analysis-DirtSlurper3100-GA/data_preprocessed.csv"
+file_path <- "data_preprocessed.csv"
 
 # Read data
 data <- read.table(file_path,
@@ -18,11 +19,11 @@ data <- read.table(file_path,
 
 # Weibull ----------------------------------------------------------------------
 # Models
-weibull_battery <- survreg(Surv(Possession.time, Battery.status) ~ Pets + Carpet.score + Total.usage.time,
+weibull_battery <- survreg(Surv(Possession.time, Battery.status) ~ Total.usage.time + Pets + Carpet.score,
                            data = data, dist = "weibull")
-weibull_impact <- survreg(Surv(Possession.time, Impact.status) ~ Pets + Carpet.score + Total.usage.time,
+weibull_impact <- survreg(Surv(Possession.time, Impact.status) ~ Total.usage.time + Pets + Carpet.score,
                           data = data, dist = "weibull")
-weibull_ir <- survreg(Surv(Possession.time, IR.status) ~ Pets + Carpet.score + Total.usage.time,
+weibull_ir <- survreg(Surv(Possession.time, IR.status) ~ Total.usage.time + Pets + Carpet.score,
                       data = data, dist = "weibull")
 
 # Model summaries
@@ -63,11 +64,11 @@ summary(weibull_ir)
 
 # Exponential ------------------------------------------------------------------
 # Models
-exp_battery <- survreg(Surv(Possession.time, Battery.status) ~ Pets + Carpet.score + Total.usage.time,
+exp_battery <- survreg(Surv(Possession.time, Battery.status) ~ Total.usage.time + Pets + Carpet.score,
                        data = data, dist = "exponential")
-exp_impact <- survreg(Surv(Possession.time, Impact.status) ~ Pets + Carpet.score + Total.usage.time ,
+exp_impact <- survreg(Surv(Possession.time, Impact.status) ~ Total.usage.time + Pets + Carpet.score ,
                       data = data, dist = "exponential")
-exp_ir <- survreg(Surv(Possession.time, IR.status) ~ Pets + Carpet.score + Total.usage.time,
+exp_ir <- survreg(Surv(Possession.time, IR.status) ~ Total.usage.time + Pets + Carpet.score,
                   data = data, dist = "exponential")
 
 # Model summaries
@@ -186,7 +187,6 @@ cat("--- BATTERY (Weibull) ---\n")
 weibull_battery <- survreg(Surv(Possession.time, Battery.status) ~ 
                              Total.usage.time + Pets + Carpet.score,
                            data = data, dist = "weibull")
-
 
 if (weibull_battery$iter >= 30) {
   cat("WARNING: Model reached iteration limit.\n\n")
@@ -506,9 +506,6 @@ resid_ir <- analyze_residuals_detailed(weibull_ir, data,
 resid_impact <- analyze_residuals_detailed(impact_model, data,
                                            "Impact.status", "Possession.time",
                                            "IMPACT SENSOR")
-<<<<<<< HEAD
-# >>>>>>> f752491f6ac575ce788b6054f7f464e9290a2fd0
-=======
 # ============================================================================
 # 5. ADDITIONAL ANALYSES FOR SPECIFICATION CHECKS
 # Testing individual covariate effects for warranty considerations
@@ -952,4 +949,3 @@ if (p_impact_pets < 0.05 || p_impact_carpet < 0.05) {
 } else {
   cat("   Standard warranty terms sufficient\n")
 }
->>>>>>> 5ce3801f5882e476f89c1ef420306c2d9d763cb2
