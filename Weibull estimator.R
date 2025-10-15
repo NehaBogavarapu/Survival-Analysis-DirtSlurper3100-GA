@@ -316,6 +316,7 @@ analyze_residuals_detailed <- function(model, data, event_col, time_col, comp_na
   shape_param <- 1 / scale_param     # Shape = 1/scale for survreg
   event <- data[[event_col]]
   #time_days <- data[[time_col]] / 24
+  time_days <- data[[time_col]] 
   
   cat("Model type:", model$dist, "\n")
   cat("Shape parameter (k):", round(shape_param, 3), "\n")
@@ -948,4 +949,3 @@ if (p_impact_pets < 0.05 || p_impact_carpet < 0.05) {
   if (p_impact_carpet < 0.05) cat("     - Carpet coverage\n")
 } else {
   cat("   Standard warranty terms sufficient\n")
-}
