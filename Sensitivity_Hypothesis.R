@@ -182,10 +182,11 @@ ggsurvplot(
 #----------------Hypothesis---------------------------#
 #For infrared sensor
 #One-sided test on the KM survival at time = 2000 using Greenwood variance.
-#ho=Claim of manufacturer true(L10>=2000 days)ie. S(2000>=0.90)
-#h1=Claim of Manufacturer false (L10<2000 days)S(2000<0.90)
-kmh_ir <- survfit(Surv(time_infraredsensor, event_infraredsensor) ~ 1, data = data)
+#H0=Claim of Manufacturer false (L10<2000 days)S(2000<0.90)
+#H1=Claim of manufacturer true(L10>=2000 days)ie. S(2000>=0.90)
 
+kmh_ir <- survfit(Surv(time_infraredsensor, event_infraredsensor) ~ 1, data = data)
+summary(kmh_ir, times=c(500,1000,1500,1800))
 # helper to get S_hat and SE at time t
 get_surv_at <- function(km, t) {
   s <- summary(km, times = t, extend = TRUE)
@@ -202,24 +203,24 @@ SE <- res$SE
 
 # Z-test (one-sided: H0: S >= 0.9 vs H1: S < 0.9)
 z <- (S_hat - 0.90) / SE
-p_value_one_sided <- pnorm(z)  # lower-tail p-value
-
+p_value_one_sided <- 1-pnorm(z) 
 list(t = t0, S_hat = S_hat, SE = SE, z = z, p_one_sided = p_value_one_sided)
-#Claim of manufacturer holds for IR as p value>=0.50 so null hypothesis correct
+
 
 
 #----------Hypothesis For Battery based inference
 #For Battery
-#Ho:Battery that is not being used intensively i.e more than 2400 hrs lasts atleast 1000 days
-#H1:Battery that is not being used intensively i.e more than 2400 hrs does not last 1000 days
+#Ho:Battery that is not being used intensively i.e more than 2400 hrs does not last 1000 days
+#H1:Battery that is not being used intensively i.e more than 2400 hrs lasts atleast 1000 days
 
-time_battery2400 <- ifelse(!is.na(failuredate) & data$Total.usage.time<=2400 & data$Battery.status == 1 ,
+
+time_battery2400 <- ifelse(!is.na(data$Failure.date) & data$Total.usage.time<=2400 & data$Battery.status == 1 ,
                            as.numeric(difftime(failuredate, reg, units="days")),
                            as.numeric(difftime(study_end, reg, units="days")))
-event_battery2400 <- ifelse(data$Battery.status == 1, 1, 0)
+event_battery2400 <- ifelse(data$Battery.status == 1 & data$Total.usage.time<=2400, 1, 0)
 
 kmh_battery2400 <- survfit(Surv(time_battery2400, event_battery2400) ~ 1, data = data)
-
+summary(kmh_battery2400, times=c(500,1000,1500,1800))
 # helper to get S_hat and SE at time t
 get_surv_at <- function(km, t) {
   s <- summary(km, times = t, extend = TRUE)
@@ -234,18 +235,22 @@ res <- get_surv_at(kmh_battery2400, t0)
 S_hat <- res$S
 SE <- res$SE
 
-# Z-test (one-sided: H0: S >= 0.9 vs H1: S < 0.9)
+# Z-test (one-sided: H0: S < 0.9 vs H1: S >= 0.9)
 z <- (S_hat - 0.90) / SE
-p_value_one_sided <- pnorm(z)  # lower-tail p-value
+p_value_one_sided <- 1-pnorm(z) 
+
 
 list(t = t0, S_hat = S_hat, SE = SE, z = z, p_one_sided = p_value_one_sided)
-#Claim of manufacturer holds for Batteries as p value>=0.50 so null hypothesis correct
+#Meaning failure even in normal batteries
+
 
 
 #--------------------Claim of Impact Sensor-------------------#
 #No claim just check
+#H0: Claim that S(1000) < 0.9 
+#H1: Claim that S(1000) >=0.9 
 kmh_impactsensor <- survfit(Surv(time_impactsensor, event_impactsensor) ~ 1, data = data)
-
+summary(kmh_impactsensor, times=c(500,1000,1500,1800))
 # helper to get S_hat and SE at time t
 get_surv_at <- function(km, t) {
   s <- summary(km, times = t, extend = TRUE)
@@ -260,10 +265,10 @@ res <- get_surv_at(kmh_impactsensor, t0)
 S_hat <- res$S
 SE <- res$SE
 
-# Z-test (one-sided: H0: S >= 0.9 vs H1: S < 0.9)
+# Z-test (one-sided: )
 z <- (S_hat - 0.90) / SE
-p_value_one_sided <- pnorm(z)  # lower-tail p-value
+p_value_one_sided <- 1-pnorm(z) 
 
 list(t = t0, S_hat = S_hat, SE = SE, z = z, p_one_sided = p_value_one_sided)
-#Claim made none holds but for Impact Sensor our analysis holds  as p value>=0.50 
+
 
