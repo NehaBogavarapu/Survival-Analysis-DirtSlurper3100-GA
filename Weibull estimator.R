@@ -791,6 +791,9 @@ cat("─────────────────────────
 
 # Filter to normal use only
 data_normal <- data %>% filter(Total.usage.time < 2400)
+#data_normal <- data %>% filter(Total.usage.time < 2400)
+#median_usage_normal <- median(data_normal$Total.usage.time, na.rm = TRUE)
+data_normal <- data[data$Total.usage.time < 2400, ]
 median_usage_normal <- median(data_normal$Total.usage.time, na.rm = TRUE)
 
 cat("Normal use dataset: n =", nrow(data_normal), "\n")
