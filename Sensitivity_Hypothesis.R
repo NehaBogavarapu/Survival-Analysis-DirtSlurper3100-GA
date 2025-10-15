@@ -52,20 +52,22 @@ time_vacuum <- ifelse(event_vacuum == 1 & !is.na(failuredate),
 #Sensitivity of Components wrt to Extreme usage
 #Because extreme usage has an overall impact
 
-#I set 2400 hrs as threshold
-threshold=2400
 
-data_sens <- data %>%
-  mutate(extreme_use = ifelse(Total.usage.time >= threshold, 1, 0))
+#data_sens <- data %>%
+ # mutate(extreme_use = ifelse(Total.usage.time >= threshold, 1, 0))
+time_battery2400 <- ifelse(!is.na(data$Failure.date) & data$Total.usage.time<2400 & data$Battery.status == 1 ,
+                           as.numeric(difftime(failuredate, reg, units="days")),
+                           as.numeric(difftime(study_end, reg, units="days")))
+event_battery2400 <- ifelse(data$Battery.status == 1 & data$Total.usage.time<2400, 1, 0)
 
 # Using data_sens here,
-km_full <- survfit(Surv(time_vacuum, event_vacuum) ~ 1, data = data_sens)
+km_full <- survfit(Surv(time_battery, event_battery) ~ 1, data = data)
 km_full
-km_no_extreme <- survfit(Surv(time_vacuum, event_vacuum) ~ 1, data = filter(data_sens, extreme_use == 0))
+km_no_extreme <- survfit(Surv(time_battery2400, event_battery2400) ~ 1, data = data)
 km_no_extreme
 library(ggpubr)
-p1 <- ggsurvplot(km_full, conf.int = TRUE, ggtheme = theme_minimal(), title = "Full Data")
-p2 <- ggsurvplot(km_no_extreme, conf.int = TRUE, ggtheme = theme_minimal(), title = "Without Extreme Use")
+p1 <- ggsurvplot(km_full, conf.int = TRUE, ggtheme = theme_minimal(), title = "Full Data Battery",data=data)
+p2 <- ggsurvplot(km_no_extreme, conf.int = TRUE, ggtheme = theme_minimal(), title = "Without Extreme Use Battery",data =data)
 
 # ✅ Merge plots into a grid
 ggarrange(p1$plot, p2$plot, ncol = 2, nrow = 1)
