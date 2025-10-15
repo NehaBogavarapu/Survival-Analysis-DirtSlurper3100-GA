@@ -76,4 +76,4 @@ data <- og_data %>%
 View(data)
 
 # # To save a csv:
-# write.csv(data, file = "C:/Users/20221564/Data_Science_and_Artificial_Intelligence/Survival-Analysis-DirtSlurper3100-GA/data_preprocessed.csv", row.names = FALSE)
+# write.csv(data, file = "C:/Users/20221564/Data_Science_and_Artificial_Intelligence/Survival-Analysis-DirtSlurper3100-GA/data_preprocessed.csv", row.names = FALSE)# write.csv(data, file = "C:/Users/20221564/Data_Science_and_Artificial_Intelligence/Survival-Analysis-DirtSlurper3100-GA/data_preprocessed.csv", row.names = FALSE)

@@ -7,6 +7,7 @@ library(survminer)
 #file_path <- "C:/Users/20221564/Data_Science_and_Artificial_Intelligence/Survival-Analysis-DirtSlurper3100-GA/data_preprocessed.csv"
 file_path <- "data_preprocessed.csv"
 
+
 # Read data
 data <- read.table(file_path,
                    header = TRUE,
