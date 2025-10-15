@@ -214,10 +214,10 @@ list(t = t0, S_hat = S_hat, SE = SE, z = z, p_one_sided = p_value_one_sided)
 #H1:Battery that is not being used intensively i.e more than 2400 hrs lasts atleast 1000 days
 
 
-time_battery2400 <- ifelse(!is.na(data$Failure.date) & data$Total.usage.time<=2400 & data$Battery.status == 1 ,
+time_battery2400 <- ifelse(!is.na(data$Failure.date) & data$Total.usage.time<2400 & data$Battery.status == 1 ,
                            as.numeric(difftime(failuredate, reg, units="days")),
                            as.numeric(difftime(study_end, reg, units="days")))
-event_battery2400 <- ifelse(data$Battery.status == 1 & data$Total.usage.time<=2400, 1, 0)
+event_battery2400 <- ifelse(data$Battery.status == 1 & data$Total.usage.time<2400, 1, 0)
 
 kmh_battery2400 <- survfit(Surv(time_battery2400, event_battery2400) ~ 1, data = data)
 summary(kmh_battery2400, times=c(500,1000,1500,1800))
