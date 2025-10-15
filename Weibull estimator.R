@@ -299,9 +299,17 @@ cat("Result:", ifelse(p_val2 < 0.05, "Weibull PREFERRED", "Exponential adequate"
 cat("\nAIC Comparison:\n")
 print(AIC(exp_battery, weibull_battery))
 
+<<<<<<< HEAD
 # Test 1: Impact - Are covariates significant?
 cat("\n--- Test 1: Impact Covariates ---\n")
 weibull_impact_null <- survreg(Surv(Possession.time , Impact.status) ~ 1 + Total.usage.time + Pets + Carpet.score,,
+=======
+cat("\n\n=== LIKELIHOOD RATIO TESTS ===\n")
+
+# Test 3: Impact - Are covariates significant?
+cat("\n--- Test 3: Impact Covariates ---\n")
+weibull_impact_null <- survreg(Surv(Possession.time , Impact.status) ~ 1,
+>>>>>>> 5db14771f209685bba9e4dbd876c1febe7ebdb2d
                                 data = data, dist = "weibull")
 
 if (weibull_impact$loglik[2] > weibull_impact_null$loglik[2]) {
@@ -318,8 +326,13 @@ cat("df: 3\n")
 cat("p-value:", format.pval(p_val1), "\n")
 cat("Result:", ifelse(p_val1 < 0.05, "Covariates SIGNIFICANT", "Not significant"), "\n")
 
+<<<<<<< HEAD
 # Test 2: Impact - Weibull vs Exponential
 cat("\n--- Test 2: Impact Distribution ---\n")
+=======
+# Test 4: Impact - Weibull vs Exponential
+cat("\n--- Test 4: Impact Distribution ---\n")
+>>>>>>> 5db14771f209685bba9e4dbd876c1febe7ebdb2d
 exp_impact <- survreg(Surv(Possession.time , Impact.status) ~ 
                          Total.usage.time + Pets + Carpet.score,
                        data = data, dist = "exponential")
@@ -334,10 +347,19 @@ cat("Result:", ifelse(p_val2 < 0.05, "Weibull PREFERRED", "Exponential adequate"
 cat("\nAIC Comparison:\n")
 print(AIC(exp_impact, weibull_impact))
 
+<<<<<<< HEAD
 # Test 1: IR - Are covariates significant?
 cat("\n--- Test 1: IR Covariates ---\n")
 weibull_ir_null <- survreg(Surv(Possession.time , IR.status) ~ 1 + Total.usage.time + Pets + Carpet.score,,
                                data = data, dist = "weibull")
+=======
+cat("\n\n=== LIKELIHOOD RATIO TESTS ===\n")
+
+# Test 5: IR - Are covariates significant?
+cat("\n--- Test 5: IR Covariates ---\n")
+weibull_ir_null <- survreg(Surv(Possession.time , IR.status) ~ 1,
+                                data = data, dist = "weibull")
+>>>>>>> 5db14771f209685bba9e4dbd876c1febe7ebdb2d
 
 if (weibull_ir$loglik[2] > weibull_ir_null$loglik[2]) {
   cat("WARNING: Convergence issue detected\n")
@@ -353,11 +375,19 @@ cat("df: 3\n")
 cat("p-value:", format.pval(p_val1), "\n")
 cat("Result:", ifelse(p_val1 < 0.05, "Covariates SIGNIFICANT", "Not significant"), "\n")
 
+<<<<<<< HEAD
 # Test 2: IR - Weibull vs Exponential
 cat("\n--- Test 2: IR Distribution ---\n")
 exp_ir <- survreg(Surv(Possession.time , IR.status) ~ 
                         Total.usage.time + Pets + Carpet.score,
                       data = data, dist = "exponential")
+=======
+# Test 6: IR - Weibull vs Exponential
+cat("\n--- Test 6: Battery Distribution ---\n")
+exp_ir <- survreg(Surv(Possession.time , IR.status) ~ 
+                         Total.usage.time + Pets + Carpet.score,
+                       data = data, dist = "exponential")
+>>>>>>> 5db14771f209685bba9e4dbd876c1febe7ebdb2d
 LRT2 <- 2 * abs(weibull_ir$loglik[2] - exp_ir$loglik[2])
 p_val2 <- 1 - pchisq(LRT2, df = 1)
 
@@ -370,10 +400,10 @@ cat("\nAIC Comparison:\n")
 print(AIC(exp_ir, weibull_ir))
 
 # ============================================================================
-# 4. RESIDUAL ANALYSIS - DETAILED EXPLANATION
+# 4. RESIDUAL ANALYSIS 
 # ============================================================================
 
-cat("\n\n=== RESIDUAL ANALYSIS - DETAILED ===\n")
+cat("\n\n=== RESIDUAL ANALYSIS - DETAILED EXPLANATION ===\n")
 
 analyze_residuals_detailed <- function(model, data, event_col, time_col, comp_name) {
   cat("\n" ," ═══════════════════════════════════════════════\n")
