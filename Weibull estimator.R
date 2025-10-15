@@ -269,7 +269,7 @@ cat("\n\n=== LIKELIHOOD RATIO TESTS ===\n")
 
 # Test 1: Battery - Are covariates significant?
 cat("\n--- Test 1: Battery Covariates ---\n")
-weibull_battery_null <- survreg(Surv(Possession.time , Battery.status) ~ 1,
+
 weibull_battery_null <- survreg(Surv(Possession.time , Battery.status) ~ Total.usage.time + Pets + Carpet.score,
                                 data = data, dist = "weibull")
 
@@ -307,7 +307,7 @@ cat("\n\n=== LIKELIHOOD RATIO TESTS ===\n")
 
 # Test 3: Impact - Are covariates significant?
 cat("\n--- Test 3: Impact Covariates ---\n")
-weibull_impact_null <- survreg(Surv(Possession.time , Impact.status) ~ 1,
+
 weibull_impact_null <- survreg(Surv(Possession.time , Impact.status) ~ Total.usage.time + Pets + Carpet.score,
                                 data = data, dist = "weibull")
 
@@ -347,7 +347,7 @@ cat("\n\n=== LIKELIHOOD RATIO TESTS ===\n")
 
 # Test 5: IR - Are covariates significant?
 cat("\n--- Test 5: IR Covariates ---\n")
-weibull_ir_null <- survreg(Surv(Possession.time , IR.status) ~ 1,
+
 weibull_ir_null <- survreg(Surv(Possession.time , IR.status) ~ Total.usage.time + Pets + Carpet.score,
                                 data = data, dist = "weibull")
 
@@ -400,12 +400,9 @@ analyze_residuals_detailed <- function(model, data, event_col, time_col, comp_na
   scale_param <- model$scale         # Scale parameter
   shape_param <- 1 / scale_param     # Shape = 1/scale for survreg
   event <- data[[event_col]]
-<<<<<<< HEAD
-  #time_days <- data[[time_col]] / 24
+
   time_days <- data[[time_col]] 
-=======
-  time_days <- data[[time_col]]
->>>>>>> 5db14771f209685bba9e4dbd876c1febe7ebdb2d
+
   
   cat("Model type:", model$dist, "\n")
   cat("Shape parameter (k):", round(shape_param, 3), "\n")
@@ -790,7 +787,6 @@ cat("BATTERY: L10 >= 1,000 days (excluding extreme use >= 2,400h)\n")
 cat("─────────────────────────────────────────────────\n")
 
 # Filter to normal use only
-data_normal <- data %>% filter(Total.usage.time < 2400)
 #data_normal <- data %>% filter(Total.usage.time < 2400)
 #median_usage_normal <- median(data_normal$Total.usage.time, na.rm = TRUE)
 data_normal <- data[data$Total.usage.time < 2400, ]
