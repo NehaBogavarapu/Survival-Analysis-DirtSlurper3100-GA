@@ -1030,3 +1030,4 @@ if (p_impact_pets < 0.05 || p_impact_carpet < 0.05) {
   if (p_impact_carpet < 0.05) cat("     - Carpet coverage\n")
 } else {
   cat("   Standard warranty terms sufficient\n")
+}
