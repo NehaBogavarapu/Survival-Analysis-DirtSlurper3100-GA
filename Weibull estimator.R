@@ -185,6 +185,7 @@ cat("Covariates: Usage intensity (Total.usage.time), Pets, Carpet.score\n\n")
 
 # Battery - Weibull
 # Battery - Weibull.
+
 cat("--- BATTERY (Weibull) ---\n")
 weibull_battery <- survreg(Surv(Possession.time, Battery.status) ~ 
                              Total.usage.time + Pets + Carpet.score,
@@ -269,6 +270,7 @@ cat("\n\n=== LIKELIHOOD RATIO TESTS ===\n")
 # Test 1: Battery - Are covariates significant?
 cat("\n--- Test 1: Battery Covariates ---\n")
 weibull_battery_null <- survreg(Surv(Possession.time , Battery.status) ~ 1,
+weibull_battery_null <- survreg(Surv(Possession.time , Battery.status) ~ Total.usage.time + Pets + Carpet.score,
                                 data = data, dist = "weibull")
 
 if (weibull_battery$loglik[2] > weibull_battery_null$loglik[2]) {
@@ -306,6 +308,7 @@ cat("\n\n=== LIKELIHOOD RATIO TESTS ===\n")
 # Test 3: Impact - Are covariates significant?
 cat("\n--- Test 3: Impact Covariates ---\n")
 weibull_impact_null <- survreg(Surv(Possession.time , Impact.status) ~ 1,
+weibull_impact_null <- survreg(Surv(Possession.time , Impact.status) ~ Total.usage.time + Pets + Carpet.score,
                                 data = data, dist = "weibull")
 
 if (weibull_impact$loglik[2] > weibull_impact_null$loglik[2]) {
@@ -322,8 +325,10 @@ cat("df: 3\n")
 cat("p-value:", format.pval(p_val1), "\n")
 cat("Result:", ifelse(p_val1 < 0.05, "Covariates SIGNIFICANT", "Not significant"), "\n")
 
+
 # Test 4: Impact - Weibull vs Exponential
 cat("\n--- Test 4: Impact Distribution ---\n")
+
 exp_impact <- survreg(Surv(Possession.time , Impact.status) ~ 
                          Total.usage.time + Pets + Carpet.score,
                        data = data, dist = "exponential")
@@ -343,6 +348,7 @@ cat("\n\n=== LIKELIHOOD RATIO TESTS ===\n")
 # Test 5: IR - Are covariates significant?
 cat("\n--- Test 5: IR Covariates ---\n")
 weibull_ir_null <- survreg(Surv(Possession.time , IR.status) ~ 1,
+weibull_ir_null <- survreg(Surv(Possession.time , IR.status) ~ Total.usage.time + Pets + Carpet.score,
                                 data = data, dist = "weibull")
 
 if (weibull_ir$loglik[2] > weibull_ir_null$loglik[2]) {
@@ -364,6 +370,7 @@ cat("\n--- Test 6: Battery Distribution ---\n")
 exp_ir <- survreg(Surv(Possession.time , IR.status) ~ 
                          Total.usage.time + Pets + Carpet.score,
                        data = data, dist = "exponential")
+
 LRT2 <- 2 * abs(weibull_ir$loglik[2] - exp_ir$loglik[2])
 p_val2 <- 1 - pchisq(LRT2, df = 1)
 
@@ -381,6 +388,7 @@ print(AIC(exp_ir, weibull_ir))
 # ============================================================================
 
 cat("\n\n=== RESIDUAL ANALYSIS - DETAILED ===\n")
+cat("\n\n=== RESIDUAL ANALYSIS - DETAILED EXPLANATION ===\n")
 
 analyze_residuals_detailed <- function(model, data, event_col, time_col, comp_name) {
   cat("\n" ," ═══════════════════════════════════════════════\n")
@@ -994,6 +1002,7 @@ if (p_battery_carpet < 0.05) {
 }
 if (p_ir_carpet < 0.05) {
   cat("  • IR Sensor: Carpet coverage significantly affects survival\n")
+  cat("  • IR Sensor: Carpet coverage significantly affFects survival\n")
 }
 if (p_impact_carpet < 0.05) {
   cat("  • Impact Sensor: Carpet coverage significantly affects survival\n")
