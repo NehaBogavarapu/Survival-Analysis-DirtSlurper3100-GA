@@ -182,7 +182,7 @@ cat("\n\n=== ACCELERATED FAILURE TIME MODELS ===\n")
 cat("Time scale: Calendar time (Possession.time)\n")
 cat("Covariates: Usage intensity (Total.usage.time), Pets, Carpet.score\n\n")
 
-# Battery - Weibull
+# Battery - Weibull.
 cat("--- BATTERY (Weibull) ---\n")
 weibull_battery <- survreg(Surv(Possession.time, Battery.status) ~ 
                              Total.usage.time + Pets + Carpet.score,
