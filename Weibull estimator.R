@@ -184,6 +184,7 @@ cat("Time scale: Calendar time (Possession.time)\n")
 cat("Covariates: Usage intensity (Total.usage.time), Pets, Carpet.score\n\n")
 
 # Battery - Weibull
+# Battery - Weibull.
 cat("--- BATTERY (Weibull) ---\n")
 weibull_battery <- survreg(Surv(Possession.time, Battery.status) ~ 
                              Total.usage.time + Pets + Carpet.score,
@@ -300,8 +301,83 @@ cat("Result:", ifelse(p_val2 < 0.05, "Weibull PREFERRED", "Exponential adequate"
 cat("\nAIC Comparison:\n")
 print(AIC(exp_battery, weibull_battery))
 
+cat("\n\n=== LIKELIHOOD RATIO TESTS ===\n")
+
+# Test 3: Impact - Are covariates significant?
+cat("\n--- Test 3: Impact Covariates ---\n")
+weibull_impact_null <- survreg(Surv(Possession.time , Impact.status) ~ 1,
+                                data = data, dist = "weibull")
+
+if (weibull_impact$loglik[2] > weibull_impact_null$loglik[2]) {
+  cat("WARNING: Convergence issue detected\n")
+  LRT1 <- 2 * abs(weibull_impact$loglik[2] - weibull_impact_null$loglik[2])
+} else {
+  LRT1 <- 2 * (weibull_impact$loglik[2] - weibull_impact_null$loglik[2])
+}
+
+p_val1 <- 1 - pchisq(abs(LRT1), df = 3)  # 3 covariates now
+
+cat("LRT statistic:", abs(LRT1), "\n")
+cat("df: 3\n")
+cat("p-value:", format.pval(p_val1), "\n")
+cat("Result:", ifelse(p_val1 < 0.05, "Covariates SIGNIFICANT", "Not significant"), "\n")
+
+# Test 4: Impact - Weibull vs Exponential
+cat("\n--- Test 4: Impact Distribution ---\n")
+exp_impact <- survreg(Surv(Possession.time , Impact.status) ~ 
+                         Total.usage.time + Pets + Carpet.score,
+                       data = data, dist = "exponential")
+LRT2 <- 2 * abs(weibull_impact$loglik[2] - exp_impact$loglik[2])
+p_val2 <- 1 - pchisq(LRT2, df = 1)
+
+cat("LRT statistic:", LRT2, "\n")
+cat("p-value:", format.pval(p_val2), "\n")
+cat("Result:", ifelse(p_val2 < 0.05, "Weibull PREFERRED", "Exponential adequate"), "\n")
+
+# Model comparison
+cat("\nAIC Comparison:\n")
+print(AIC(exp_impact, weibull_impact))
+
+cat("\n\n=== LIKELIHOOD RATIO TESTS ===\n")
+
+# Test 5: IR - Are covariates significant?
+cat("\n--- Test 5: IR Covariates ---\n")
+weibull_ir_null <- survreg(Surv(Possession.time , IR.status) ~ 1,
+                                data = data, dist = "weibull")
+
+if (weibull_ir$loglik[2] > weibull_ir_null$loglik[2]) {
+  cat("WARNING: Convergence issue detected\n")
+  LRT1 <- 2 * abs(weibull_ir$loglik[2] - weibull_ir_null$loglik[2])
+} else {
+  LRT1 <- 2 * (weibull_ir$loglik[2] - weibull_ir_null$loglik[2])
+}
+
+p_val1 <- 1 - pchisq(abs(LRT1), df = 3)  # 3 covariates now
+
+cat("LRT statistic:", abs(LRT1), "\n")
+cat("df: 3\n")
+cat("p-value:", format.pval(p_val1), "\n")
+cat("Result:", ifelse(p_val1 < 0.05, "Covariates SIGNIFICANT", "Not significant"), "\n")
+
+# Test 6: IR - Weibull vs Exponential
+cat("\n--- Test 6: Battery Distribution ---\n")
+exp_ir <- survreg(Surv(Possession.time , IR.status) ~ 
+                         Total.usage.time + Pets + Carpet.score,
+                       data = data, dist = "exponential")
+LRT2 <- 2 * abs(weibull_ir$loglik[2] - exp_ir$loglik[2])
+p_val2 <- 1 - pchisq(LRT2, df = 1)
+
+cat("LRT statistic:", LRT2, "\n")
+cat("p-value:", format.pval(p_val2), "\n")
+cat("Result:", ifelse(p_val2 < 0.05, "Weibull PREFERRED", "Exponential adequate"), "\n")
+
+# Model comparison
+cat("\nAIC Comparison:\n")
+print(AIC(exp_ir, weibull_ir))
+
 # ============================================================================
 # 4. RESIDUAL ANALYSIS - DETAILED EXPLANATION
+# 4. RESIDUAL ANALYSIS 
 # ============================================================================
 
 cat("\n\n=== RESIDUAL ANALYSIS - DETAILED ===\n")
@@ -316,8 +392,12 @@ analyze_residuals_detailed <- function(model, data, event_col, time_col, comp_na
   scale_param <- model$scale         # Scale parameter
   shape_param <- 1 / scale_param     # Shape = 1/scale for survreg
   event <- data[[event_col]]
+<<<<<<< HEAD
   #time_days <- data[[time_col]] / 24
   time_days <- data[[time_col]] 
+=======
+  time_days <- data[[time_col]]
+>>>>>>> 5db14771f209685bba9e4dbd876c1febe7ebdb2d
   
   cat("Model type:", model$dist, "\n")
   cat("Shape parameter (k):", round(shape_param, 3), "\n")
