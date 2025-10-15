@@ -85,10 +85,10 @@ summary(km_vacuum, times=c(500,1000,1500,1800))
 
 #Analysing Inference two(a)
 # setting up parameters for Battery that runs at most 2400 hours
-time_battery2400 <- ifelse(!is.na(data$Failure.date) & data$Total.usage.time<=2400 & data$Battery.status == 1 ,
+time_battery2400 <- ifelse(!is.na(data$Failure.date) & data$Total.usage.time<2400 & data$Battery.status == 1 ,
                            as.numeric(difftime(failuredate, reg, units="days")),
                            as.numeric(difftime(study_end, reg, units="days")))
-event_battery2400 <- ifelse(data$Battery.status == 1 & data$Total.usage.time<=2400, 1, 0)
+event_battery2400 <- ifelse(data$Battery.status == 1 & data$Total.usage.time<2400, 1, 0)
 
 # Kaplan Mier Estimation
 km_battery2400 <- survfit(Surv(time_battery2400, event_battery2400) ~ 1, data = data)
