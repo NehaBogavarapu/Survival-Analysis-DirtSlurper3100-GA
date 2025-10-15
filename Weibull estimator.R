@@ -7,11 +7,12 @@ library(survminer)
 #file_path <- "C:/Users/20221564/Data_Science_and_Artificial_Intelligence/Survival-Analysis-DirtSlurper3100-GA/data_preprocessed.csv"
 file_path <- "data_preprocessed.csv"
 
+
 # Read data
 data <- read.table(file_path,
-                      header = TRUE,
-                      sep = ",",
-                      stringsAsFactors = FALSE)
+                   header = TRUE,
+                   sep = ",",
+                   stringsAsFactors = FALSE)
 
 # View(data).
 
@@ -34,32 +35,32 @@ summary(weibull_ir)
 # NOTES (possession times):
 
 # Battery model
-  # Negative coefficients for Pets and Carpet.score indicate these factors shorten battery survival time.
-  # Scale parameter (≈0.418) implies shape > 1, meaning hazard (failure rate) increases with time (aging effect).
+# Negative coefficients for Pets and Carpet.score indicate these factors shorten battery survival time.
+# Scale parameter (≈0.418) implies shape > 1, meaning hazard (failure rate) increases with time (aging effect).
 # Impact sensor
-  # Model did not converge properly 
-  # EDA shows its the least occuring failure instance 
+# Model did not converge properly 
+# EDA shows its the least occuring failure instance 
 # IR sensor
-  # Roughly constant hazard over time (shape approx = 1)
-  # Estimates not statistically significant
+# Roughly constant hazard over time (shape approx = 1)
+# Estimates not statistically significant
 
 
 
 
 # OLD NOTES (total usage time):
 # Battery model
-  # Pets =             0.15543 ---> having pets increases log survival time, so longer survival time (less damage/failure) for battery when pets present.
-  # Carpet.score =     -0.01869 ---> higher carpet score reduces survival time (battery fails sooner).
-  # Scale = exp(-1.58) ≈ 0.205 ---> shape parameter (1/scale) < 1 means hazard rate decreases over time (failures happen early, then decrease).
+# Pets =             0.15543 ---> having pets increases log survival time, so longer survival time (less damage/failure) for battery when pets present.
+# Carpet.score =     -0.01869 ---> higher carpet score reduces survival time (battery fails sooner).
+# Scale = exp(-1.58) ≈ 0.205 ---> shape parameter (1/scale) < 1 means hazard rate decreases over time (failures happen early, then decrease).
 # Impact sensor model
-  # Model did not converge properly so NA values 
-  # Looks wrong - log likelihood values are crazy (negative and huge)
-  # Maybe too few failures? unstable and unreliable
+# Model did not converge properly so NA values 
+# Looks wrong - log likelihood values are crazy (negative and huge)
+# Maybe too few failures? unstable and unreliable
 # IR sensor model
-  # converged properly 
-  # Pets significantly increase log survival, while carpet score has negligible effect. 
-  # Scale ≈ 1 indicates roughly constant hazard over time. 
-  # The AIC is comparable to the exponential model.
+# converged properly 
+# Pets significantly increase log survival, while carpet score has negligible effect. 
+# Scale ≈ 1 indicates roughly constant hazard over time. 
+# The AIC is comparable to the exponential model.
 
 
 # Exponential ------------------------------------------------------------------
@@ -77,24 +78,24 @@ summary(exp_impact)
 summary(exp_ir)
 
 # NOTES:
-  # All models assume a constant hazard rate over time (scale fixed at 1).
-  # Negative coefficient for Pets and/or Carpet.score means those factors shorten survival time (accelerate failure) for components.
-  # Positive coefficient means the factor is associated with longer survival time (delays failure).
-  # For exp_battery and exp_impact, Pets significantly reduce survival time; Carpet.score mostly shortens time except in impact sensor (where it's positive).
-  # For exp_ir, neither Pets nor Carpet.score are significant predictors of survival; covariates have no explanatory power (Chisq ~ 0, p ~ 1 indicates null effect).
-  # Use exponential model for impact sensor when Weibull does not converge.
+# All models assume a constant hazard rate over time (scale fixed at 1).
+# Negative coefficient for Pets and/or Carpet.score means those factors shorten survival time (accelerate failure) for components.
+# Positive coefficient means the factor is associated with longer survival time (delays failure).
+# For exp_battery and exp_impact, Pets significantly reduce survival time; Carpet.score mostly shortens time except in impact sensor (where it's positive).
+# For exp_ir, neither Pets nor Carpet.score are significant predictors of survival; covariates have no explanatory power (Chisq ~ 0, p ~ 1 indicates null effect).
+# Use exponential model for impact sensor when Weibull does not converge.
 
 # OLD NOTES:
 # Battery Model:
-  # Coefficients indicate that pets reduce failure risk (negative hazard effect) and higher carpet score slightly increases failure rate. 
-  # Scale is fixed at 1 (constant hazard).
+# Coefficients indicate that pets reduce failure risk (negative hazard effect) and higher carpet score slightly increases failure rate. 
+# Scale is fixed at 1 (constant hazard).
 # Impact sensor model
-  # Exponential model converged - gave interpretable coefficients, unlike the Weibull model. 
-  # Pets reduce failures, carpet score increases failures. 
-  # This model is usable for the impact sensor since Weibull failed.
+# Exponential model converged - gave interpretable coefficients, unlike the Weibull model. 
+# Pets reduce failures, carpet score increases failures. 
+# This model is usable for the impact sensor since Weibull failed.
 # IR sensor model
-  # Similar to the Weibull model; coefficients indicate pets increase survival, carpet score negligible effect. 
-  # Scale fixed at 1.
+# Similar to the Weibull model; coefficients indicate pets increase survival, carpet score negligible effect. 
+# Scale fixed at 1.
 
 
 # Model comparison with AIC (Akaike Information Criterion) ---------------------
@@ -108,24 +109,24 @@ print(aic_comparison_ir)
 print(aic_comparison_impact)
 
 # NOTES:
-  # For Battery: Weibull model (AIC=16430.83) fits better than Exponential (AIC=17020.59).
-  # For Infrared Sensor: Exponential model (AIC=7879.21) fits slightly better than Weibull (AIC=7880.78).
-  # For Impact Sensor: Exponential model (AIC=2611.92) vastly outperforms Weibull (AIC=149732.12), confirming Weibull convergence issues.
-  # Large AIC difference indicates strong evidence favoring the model with lowest AIC.
-  # AIC is especially useful for comparing non-nested parametric survival models on the same dataset.
-  # Note: AIC can be sensitive to high censoring; interpret with caution if censoring is large.
+# For Battery: Weibull model (AIC=16430.83) fits better than Exponential (AIC=17020.59).
+# For Infrared Sensor: Exponential model (AIC=7879.21) fits slightly better than Weibull (AIC=7880.78).
+# For Impact Sensor: Exponential model (AIC=2611.92) vastly outperforms Weibull (AIC=149732.12), confirming Weibull convergence issues.
+# Large AIC difference indicates strong evidence favoring the model with lowest AIC.
+# AIC is especially useful for comparing non-nested parametric survival models on the same dataset.
+# Note: AIC can be sensitive to high censoring; interpret with caution if censoring is large.
 
 
 # OLD NOTES:
 
-  # Battery: Weibull fits better than exponential (AIC = 12771.94 < 13487.43).
-  # IR sensor: Exponential slightly better in terms of AIC (6229.1 < 6230.7).
-  # Impact sensor: Weibull is unstable; exponential should be used.
-  
-  # Other Takeaways:
-    # Non-convergence in Weibull for impact sensor suggests insufficient failure events (models require enough events for stable estimation)
-    # Pets consistently affect survival across models; Carpet score effect is small and sometimes negligible.
-    # Right censoring handled properly: devices without failure dates were treated as censored, which allows correct likelihood calculation.
+# Battery: Weibull fits better than exponential (AIC = 12771.94 < 13487.43).
+# IR sensor: Exponential slightly better in terms of AIC (6229.1 < 6230.7).
+# Impact sensor: Weibull is unstable; exponential should be used.
+
+# Other Takeaways:
+# Non-convergence in Weibull for impact sensor suggests insufficient failure events (models require enough events for stable estimation)
+# Pets consistently affect survival across models; Carpet score effect is small and sometimes negligible.
+# Right censoring handled properly: devices without failure dates were treated as censored, which allows correct likelihood calculation.
 
 # Key Takeaways
 # Non-convergence in Weibull for impact sensor suggests insufficient failure events (models require enough events for stable estimation)
@@ -183,6 +184,8 @@ cat("Time scale: Calendar time (Possession.time)\n")
 cat("Covariates: Usage intensity (Total.usage.time), Pets, Carpet.score\n\n")
 
 # Battery - Weibull
+# Battery - Weibull.
+
 cat("--- BATTERY (Weibull) ---\n")
 weibull_battery <- survreg(Surv(Possession.time, Battery.status) ~ 
                              Total.usage.time + Pets + Carpet.score,
@@ -266,6 +269,7 @@ cat("\n\n=== LIKELIHOOD RATIO TESTS ===\n")
 
 # Test 1: Battery - Are covariates significant?
 cat("\n--- Test 1: Battery Covariates ---\n")
+weibull_battery_null <- survreg(Surv(Possession.time , Battery.status) ~ 1,
 weibull_battery_null <- survreg(Surv(Possession.time , Battery.status) ~ Total.usage.time + Pets + Carpet.score,
                                 data = data, dist = "weibull")
 
@@ -303,6 +307,7 @@ cat("\n\n=== LIKELIHOOD RATIO TESTS ===\n")
 
 # Test 3: Impact - Are covariates significant?
 cat("\n--- Test 3: Impact Covariates ---\n")
+weibull_impact_null <- survreg(Surv(Possession.time , Impact.status) ~ 1,
 weibull_impact_null <- survreg(Surv(Possession.time , Impact.status) ~ Total.usage.time + Pets + Carpet.score,
                                 data = data, dist = "weibull")
 
@@ -342,6 +347,7 @@ cat("\n\n=== LIKELIHOOD RATIO TESTS ===\n")
 
 # Test 5: IR - Are covariates significant?
 cat("\n--- Test 5: IR Covariates ---\n")
+weibull_ir_null <- survreg(Surv(Possession.time , IR.status) ~ 1,
 weibull_ir_null <- survreg(Surv(Possession.time , IR.status) ~ Total.usage.time + Pets + Carpet.score,
                                 data = data, dist = "weibull")
 
@@ -377,9 +383,11 @@ cat("\nAIC Comparison:\n")
 print(AIC(exp_ir, weibull_ir))
 
 # ============================================================================
+# 4. RESIDUAL ANALYSIS - DETAILED EXPLANATION
 # 4. RESIDUAL ANALYSIS 
 # ============================================================================
 
+cat("\n\n=== RESIDUAL ANALYSIS - DETAILED ===\n")
 cat("\n\n=== RESIDUAL ANALYSIS - DETAILED EXPLANATION ===\n")
 
 analyze_residuals_detailed <- function(model, data, event_col, time_col, comp_name) {
@@ -392,7 +400,12 @@ analyze_residuals_detailed <- function(model, data, event_col, time_col, comp_na
   scale_param <- model$scale         # Scale parameter
   shape_param <- 1 / scale_param     # Shape = 1/scale for survreg
   event <- data[[event_col]]
+<<<<<<< HEAD
+  #time_days <- data[[time_col]] / 24
+  time_days <- data[[time_col]] 
+=======
   time_days <- data[[time_col]]
+>>>>>>> 5db14771f209685bba9e4dbd876c1febe7ebdb2d
   
   cat("Model type:", model$dist, "\n")
   cat("Shape parameter (k):", round(shape_param, 3), "\n")
@@ -778,6 +791,9 @@ cat("─────────────────────────
 
 # Filter to normal use only
 data_normal <- data %>% filter(Total.usage.time < 2400)
+#data_normal <- data %>% filter(Total.usage.time < 2400)
+#median_usage_normal <- median(data_normal$Total.usage.time, na.rm = TRUE)
+data_normal <- data[data$Total.usage.time < 2400, ]
 median_usage_normal <- median(data_normal$Total.usage.time, na.rm = TRUE)
 
 cat("Normal use dataset: n =", nrow(data_normal), "\n")
@@ -988,6 +1004,7 @@ if (p_battery_carpet < 0.05) {
   cat("  • Battery: Carpet coverage significantly affects survival\n")
 }
 if (p_ir_carpet < 0.05) {
+  cat("  • IR Sensor: Carpet coverage significantly affects survival\n")
   cat("  • IR Sensor: Carpet coverage significantly affFects survival\n")
 }
 if (p_impact_carpet < 0.05) {

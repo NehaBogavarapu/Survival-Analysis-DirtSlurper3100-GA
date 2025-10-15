@@ -2,8 +2,7 @@ library(tidyverse)
 library(lubridate)
 
 # Set path to CSV data file 
-file_path <- "C:/Users/20221564/Data_Science_and_Artificial_Intelligence/Survival-Analysis-DirtSlurper3100-GA/DirtSlurper3100.csv"
-
+#file_path <- "D:\\TUE Study Material\\Q1\\Survival Analysis for Data Scientists\\GA_17\\Survival-Analysis-DirtSlurper3100-GA\\DirtSlurper3100.csv"
 # Load packages 
 
 # Read data
@@ -77,4 +76,4 @@ data <- og_data %>%
 View(data)
 
 # # To save a csv:
-# write.csv(data, file = "C:/Users/20221564/Data_Science_and_Artificial_Intelligence/Survival-Analysis-DirtSlurper3100-GA/data_preprocessed.csv", row.names = FALSE)
+# write.csv(data, file = "C:/Users/20221564/Data_Science_and_Artificial_Intelligence/Survival-Analysis-DirtSlurper3100-GA/data_preprocessed.csv", row.names = FALSE)# write.csv(data, file = "C:/Users/20221564/Data_Science_and_Artificial_Intelligence/Survival-Analysis-DirtSlurper3100-GA/data_preprocessed.csv", row.names = FALSE)
