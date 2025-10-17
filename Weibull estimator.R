@@ -133,9 +133,9 @@ print(aic_comparison_impact)
 # Pets consistently affect survival across models; Carpet score effect is small and sometimes negligible.
 # Right censoring handled properly: devices without failure dates were treated as censored, which allows correct likelihood calculation.
 
-# ============================================================================
+# ===========================================================================
 # 1. LOG-RANK TEST - EXTREME USAGE EFFECT
-# ============================================================================
+# ===========================================================================
 
 cat("\n\n=== LOG-RANK TEST: EXTREME USAGE (>=2400 hours) ===\n")
 
@@ -270,7 +270,7 @@ cat("\n\n=== LIKELIHOOD RATIO TESTS ===\n")
 # Test 1: Battery - Are covariates significant?
 cat("\n--- Test 1: Battery Covariates ---\n")
 
-weibull_battery_null <- survreg(Surv(Possession.time , Battery.status) ~ Total.usage.time + Pets + Carpet.score,
+weibull_battery_null <- survreg(Surv(Possession.time , Battery.status) ~ 1,
                                 data = data, dist = "weibull")
 
 if (weibull_battery$loglik[2] > weibull_battery_null$loglik[2]) {
@@ -308,7 +308,7 @@ cat("\n\n=== LIKELIHOOD RATIO TESTS ===\n")
 # Test 3: Impact - Are covariates significant?
 cat("\n--- Test 3: Impact Covariates ---\n")
 
-weibull_impact_null <- survreg(Surv(Possession.time , Impact.status) ~ Total.usage.time + Pets + Carpet.score,
+weibull_impact_null <- survreg(Surv(Possession.time , Impact.status) ~ 1,
                                 data = data, dist = "weibull")
 
 if (weibull_impact$loglik[2] > weibull_impact_null$loglik[2]) {
@@ -348,7 +348,7 @@ cat("\n\n=== LIKELIHOOD RATIO TESTS ===\n")
 # Test 5: IR - Are covariates significant?
 cat("\n--- Test 5: IR Covariates ---\n")
 
-weibull_ir_null <- survreg(Surv(Possession.time , IR.status) ~ Total.usage.time + Pets + Carpet.score,
+weibull_ir_null <- survreg(Surv(Possession.time , IR.status) ~ 1,
                                 data = data, dist = "weibull")
 
 if (weibull_ir$loglik[2] > weibull_ir_null$loglik[2]) {
