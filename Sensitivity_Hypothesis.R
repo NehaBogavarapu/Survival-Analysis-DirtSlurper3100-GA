@@ -205,6 +205,8 @@ ggsurvplot(
 #One-sided test on the KM survival at time = 2000 using Greenwood variance.
 #H0=Claim of Manufacturer false (L10<2000 days)S(2000<0.90)
 #H1=Claim of manufacturer true(L10>=2000 days)ie. S(2000>=0.90)
+#H0=Claim of Manufacturer false (L10<=2000 days)S(2000<=0.90)
+#H1=Claim of manufacturer true(L10>2000 days)ie. S(2000>0.90)
 
 kmh_ir <- survfit(Surv(time_infraredsensor, event_infraredsensor) ~ 1, data = data)
 summary(kmh_ir, times=c(500,1000,1500,1800))
@@ -233,6 +235,8 @@ list(t = t0, S_hat = S_hat, SE = SE, z = z, p_one_sided = p_value_one_sided)
 #For Battery
 #Ho:Battery that is not being used intensively i.e more than 2400 hrs does not last 1000 days
 #H1:Battery that is not being used intensively i.e more than 2400 hrs lasts atleast 1000 days
+#Ho:S(1000)<=0.90
+#H1:S(1000)>0.9
 
 
 time_battery2400 <- ifelse(!is.na(data$Failure.date) & data$Total.usage.time<2400 & data$Battery.status == 1 ,
@@ -270,6 +274,8 @@ list(t = t0, S_hat = S_hat, SE = SE, z = z, p_one_sided = p_value_one_sided)
 #No claim just check
 #H0: Claim that S(1000) < 0.9 
 #H1: Claim that S(1000) >=0.9 
+#H0: Claim that S(2000) <= 0.9 
+#H1: Claim that S(2000) >0.9 
 kmh_impactsensor <- survfit(Surv(time_impactsensor, event_impactsensor) ~ 1, data = data)
 summary(kmh_impactsensor, times=c(500,1000,1500,1800))
 # helper to get S_hat and SE at time t
