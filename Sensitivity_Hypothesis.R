@@ -60,7 +60,7 @@ time_battery2400 <- ifelse(!is.na(data$Failure.date) & data$Total.usage.time<240
                            as.numeric(difftime(study_end, reg, units="days")))
 event_battery2400 <- ifelse(data$Battery.status == 1 & data$Total.usage.time<2400, 1, 0)
 
-# Using data_sens here,
+# for battery,
 km_full <- survfit(Surv(time_battery, event_battery) ~ 1, data = data)
 km_full
 km_no_extreme <- survfit(Surv(time_battery2400, event_battery2400) ~ 1, data = data)
@@ -71,6 +71,25 @@ p2 <- ggsurvplot(km_no_extreme, conf.int = TRUE, ggtheme = theme_minimal(), titl
 
 # ✅ Merge plots into a grid
 ggarrange(p1$plot, p2$plot, ncol = 2, nrow = 1)
+
+# for vacuum
+time_vacuum2400 <- ifelse(!is.na(data$Failure.date) & data$Total.usage.time<2400,
+                           as.numeric(difftime(failuredate, reg, units="days")),
+                           as.numeric(difftime(study_end, reg, units="days")))
+event_vacuum2400 <- ifelse(!is.na(data$Failure.date) & data$Total.usage.time<2400, 1, 0)
+
+
+km_full <- survfit(Surv(time_vacuum, event_vacuum) ~ 1, data = data)
+km_full
+km_no_extreme <- survfit(Surv(time_vacuum2400, event_vacuum2400) ~ 1, data = data)
+km_no_extreme
+library(ggpubr)
+p1 <- ggsurvplot(km_full, conf.int = TRUE, ggtheme = theme_minimal(), title = "Full Data of Vacuum",data=data)
+p2 <- ggsurvplot(km_no_extreme, conf.int = TRUE, ggtheme = theme_minimal(), title = "Without Extreme Use Vacuum",data =data)
+
+# ✅ Merge plots into a grid
+ggarrange(p1$plot, p2$plot, ncol = 2, nrow = 1)
+
 
 # can be answer for inference
 #Extreme users are NOT driving most failures.The failure events are spread 
