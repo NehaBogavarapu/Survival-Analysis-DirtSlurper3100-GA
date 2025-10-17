@@ -206,9 +206,9 @@ cat("Shape (k):", round(k_battery, 3), "\n")
 if (k_battery > 1) {
   cat("  → Increasing hazard (wear-out)\n")
 } else if (k_battery < 1) {
-  cat("  → Decreasing hazard (infant mortality)\n")
+  cat("Decreasing hazard (infant mortality)\n")
 } else {
-  cat("  → Constant hazard\n")
+  cat("Constant hazard\n")
 }
 
 cat("\nCovariate Effects (AFT parameterization):\n")
@@ -224,9 +224,9 @@ for (i in 2:(nrow(coef_summary)-1)) {
     cat(sprintf("    → Each additional hour of usage changes survival time by %.2f%%\n",
                 (exp(coef) - 1) * 100))
   } else if (coef > 0) {
-    cat(sprintf("    → Increases survival time by %.1f%%\n", (exp(coef) - 1) * 100))
+    cat(sprintf("Increases survival time by %.1f%%\n", (exp(coef) - 1) * 100))
   } else {
-    cat(sprintf("    → Decreases survival time by %.1f%%\n", (1 - exp(coef)) * 100))
+    cat(sprintf("Decreases survival time by %.1f%%\n", (1 - exp(coef)) * 100))
   }
 }
 
@@ -436,12 +436,9 @@ analyze_residuals_detailed <- function(model, data, event_col, time_col, comp_na
   cat("─────────────────────────────────────────────────\n")
   cat("2. MARTINGALE-LIKE RESIDUALS\n")
   cat("─────────────────────────────────────────────────\n")
-  cat("Definition: r_M = δ - H(t)\n")
-  cat("  where δ = event indicator (1=failed, 0=censored)\n")
-  cat("        H(t) = cumulative hazard (Cox-Snell residual)\n")
-  cat("Range: (-∞, 1]\n")
-  cat("  → Failed observations: approach 1\n")
-  cat("  → Censored observations: negative values\n")
+  cat("Range: (-inf, 1]\n")
+  cat("Failed observations: approach 1\n")
+  cat("Censored observations: negative values\n")
   cat("Property: Should scatter randomly around 0\n")
   cat("Use: Detect functional form misspecification\n\n")
   
@@ -450,8 +447,8 @@ analyze_residuals_detailed <- function(model, data, event_col, time_col, comp_na
   cat("Range: [", round(min(mart_resid, na.rm = TRUE), 3),
       ",", round(max(mart_resid, na.rm = TRUE), 3), "]\n")
   cat("Mean:", round(mean(mart_resid, na.rm = TRUE), 3), "(should be ≈0)\n")
-  cat("Events (δ=1): mean =", round(mean(mart_resid[event == 1], na.rm = TRUE), 3), "\n")
-  cat("Censored (δ=0): mean =", round(mean(mart_resid[event == 0], na.rm = TRUE), 3), "\n\n")
+  cat("Events=1: mean =", round(mean(mart_resid[event == 1], na.rm = TRUE), 3), "\n")
+  cat("Censored=0: mean =", round(mean(mart_resid[event == 0], na.rm = TRUE), 3), "\n\n")
   
   # -------------------------------------------------------------------------
   # 3. DEVIANCE RESIDUALS
@@ -559,20 +556,20 @@ analyze_residuals_detailed <- function(model, data, event_col, time_col, comp_na
   cat("PLOT INTERPRETATION GUIDE:\n")
   cat("═══════════════════════════════════════════════\n")
   cat("1. Cox-Snell: Points on 45° line = good fit\n")
-  cat("   - Deviation above line: underestimate hazard\n")
-  cat("   - Deviation below line: overestimate hazard\n\n")
+  cat("- Deviation above line: underestimate hazard\n")
+  cat("- Deviation below line: overestimate hazard\n\n")
   
   cat("2. Martingale: Blue lowess line flat around 0\n")
-  cat("   - U-shape: missing quadratic term\n")
-  cat("   - Trend: functional form misspecified\n\n")
+  cat("- U-shape: missing quadratic term\n")
+  cat("- Trend: functional form misspecified\n\n")
   
   cat("3. Deviance: Random scatter, most within ±2\n")
-  cat("   - Points outside ±2: investigate these cases\n")
-  cat("   - Pattern: model inadequate\n\n")
+  cat("- Points outside ±2: investigate these cases\n")
+  cat("- Pattern: model inadequate\n\n")
   
   cat("4. QQ Plot: Points on diagonal = normality\n")
-  cat("   - Tails deviate: outliers present\n")
-  cat("   - S-shape: skewed distribution\n\n")
+  cat("- Tails deviate: outliers present\n")
+  cat("- S-shape: skewed distribution\n\n")
   
   invisible(list(
     cox_snell = cox_snell,
@@ -876,7 +873,7 @@ cat("   L90:", round(L90_impact, 0), "days\n\n")
 cat("IMPACT SENSOR WARRANTY CONSIDERATIONS:\n\n")
 
 cat("1. Should warranties differ by pet ownership?\n")
-cat("   Log-rank test p-value:", format.pval(p_impact_pets), "\n")
+cat("Log-rank test p-value:", format.pval(p_impact_pets), "\n")
 if (p_impact_pets < 0.05) {
   cat("YES: Pets significantly affect impact sensor survival\n")
   cat("Consider differentiated warranty terms\n\n")
@@ -898,9 +895,9 @@ if (p_impact_pets < 0.05) {
                                   ),
                                   type = "quantile", p = 0.1)
   
-  cat("   L10 without pets:", round(L10_impact_no_pets, 0), "days\n")
-  cat("   L10 with pets:", round(L10_impact_with_pets, 0), "days\n")
-  cat("   Difference:", round(L10_impact_no_pets - L10_impact_with_pets, 0), "days\n\n")
+  cat("L10 without pets:", round(L10_impact_no_pets, 0), "days\n")
+  cat("L10 with pets:", round(L10_impact_with_pets, 0), "days\n")
+  cat("Difference:", round(L10_impact_no_pets - L10_impact_with_pets, 0), "days\n\n")
 } else {
   cat("NO: Pets do not significantly affect survival\n")
   cat("Single warranty term sufficient\n\n")
@@ -938,12 +935,12 @@ if (p_impact_carpet < 0.05) {
 }
 
 cat("RECOMMENDED SPECIFICATIONS for Impact Sensor:\n")
-cat("   Conservative guarantee: L10 >=", round(L10_impact * 0.9, 0), "days\n")
-cat("   Standard guarantee: L50 >=", round(L50_impact * 0.8, 0), "days\n\n")
+cat("Conservative guarantee: L10 >=", round(L10_impact * 0.9, 0), "days\n")
+cat("Standard guarantee: L50 >=", round(L50_impact * 0.8, 0), "days\n\n")
 
 cat("Note: Only", sum(data$Impact.status), "failures in", nrow(data), 
     "devices (", round(100 * mean(data$Impact.status), 2), "%)\n")
-cat("      Impact sensor shows excellent reliability\n\n")
+cat("Impact sensor shows excellent reliability\n\n")
 
 # ============================================================================
 # 5.4 SUMMARY: WARRANTY DIFFERENTIATION RECOMMENDATIONS
