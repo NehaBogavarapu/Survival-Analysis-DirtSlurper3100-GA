@@ -1018,7 +1018,7 @@ if (p_battery_pets < 0.05 || p_battery_carpet < 0.05) {
   cat("   Standard warranty terms sufficient\n")
 }
 
-# IR Sensor recommendations
+# IR Sensor recommendations.
 cat("\n2. IR SENSOR:\n")
 if (p_ir_pets < 0.05 || p_ir_carpet < 0.05) {
   cat("   Consider differentiated warranties based on:\n")
