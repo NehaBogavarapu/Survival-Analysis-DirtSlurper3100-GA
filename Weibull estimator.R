@@ -781,6 +781,7 @@ if (L10_ir >= 2000) {
   cat("   Performance ratio:", round(L10_ir / 2000 * 100, 1), "% of guarantee\n\n")
 }
 
+
 # ---- BATTERY ----
 cat("─────────────────────────────────────────────────\n")
 cat("BATTERY: L10 >= 1,000 days (excluding extreme use >= 2,400h)\n")
