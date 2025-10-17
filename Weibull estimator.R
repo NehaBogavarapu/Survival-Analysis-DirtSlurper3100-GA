@@ -133,9 +133,9 @@ print(aic_comparison_impact)
 # Pets consistently affect survival across models; Carpet score effect is small and sometimes negligible.
 # Right censoring handled properly: devices without failure dates were treated as censored, which allows correct likelihood calculation.
 
-# ============================================================================
+# ===========================================================================
 # 1. LOG-RANK TEST - EXTREME USAGE EFFECT
-# ============================================================================
+# ===========================================================================
 
 cat("\n\n=== LOG-RANK TEST: EXTREME USAGE (>=2400 hours) ===\n")
 
