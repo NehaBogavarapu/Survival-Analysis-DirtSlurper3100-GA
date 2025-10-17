@@ -50,7 +50,7 @@ time_vacuum <- ifelse(event_vacuum == 1 & !is.na(failuredate),
 km_battery <- survfit(Surv(time_battery, event_battery) ~ 1, data = data)
 km_impactsensor  <- survfit(Surv(time_impactsensor, event_impactsensor) ~ 1, data = data)
 km_infraredsensor   <- survfit(Surv(time_infraredsensor, event_infraredsensor) ~ 1, data = data)
-km_vacuum  <- survfit(Surv(time_vacuum, event_vacuum) ~ 1)
+km_vacuum  <- survfit(Surv(time_vacuum, event_vacuum) ~ 1,data=data)
 
 
 # KM Plots for all the components as well as the whole vacuum
