@@ -45,24 +45,6 @@ summary(weibull_ir)
 # Estimates not statistically significant
 
 
-
-
-# OLD NOTES (total usage time):
-# Battery model
-# Pets =             0.15543 ---> having pets increases log survival time, so longer survival time (less damage/failure) for battery when pets present.
-# Carpet.score =     -0.01869 ---> higher carpet score reduces survival time (battery fails sooner).
-# Scale = exp(-1.58) ≈ 0.205 ---> shape parameter (1/scale) < 1 means hazard rate decreases over time (failures happen early, then decrease).
-# Impact sensor model
-# Model did not converge properly so NA values 
-# Looks wrong - log likelihood values are crazy (negative and huge)
-# Maybe too few failures? unstable and unreliable
-# IR sensor model
-# converged properly 
-# Pets significantly increase log survival, while carpet score has negligible effect. 
-# Scale ≈ 1 indicates roughly constant hazard over time. 
-# The AIC is comparable to the exponential model.
-
-
 # Exponential ------------------------------------------------------------------
 # Models
 exp_battery <- survreg(Surv(Possession.time, Battery.status) ~ Total.usage.time + Pets + Carpet.score,
@@ -85,19 +67,6 @@ summary(exp_ir)
 # For exp_ir, neither Pets nor Carpet.score are significant predictors of survival; covariates have no explanatory power (Chisq ~ 0, p ~ 1 indicates null effect).
 # Use exponential model for impact sensor when Weibull does not converge.
 
-# OLD NOTES:
-# Battery Model:
-# Coefficients indicate that pets reduce failure risk (negative hazard effect) and higher carpet score slightly increases failure rate. 
-# Scale is fixed at 1 (constant hazard).
-# Impact sensor model
-# Exponential model converged - gave interpretable coefficients, unlike the Weibull model. 
-# Pets reduce failures, carpet score increases failures. 
-# This model is usable for the impact sensor since Weibull failed.
-# IR sensor model
-# Similar to the Weibull model; coefficients indicate pets increase survival, carpet score negligible effect. 
-# Scale fixed at 1.
-
-
 # Model comparison with AIC (Akaike Information Criterion) ---------------------
 # Lower AIC indicates a better balance of model fit and complexity
 aic_comparison_battery <- AIC(weibull_battery, exp_battery)
@@ -115,13 +84,6 @@ print(aic_comparison_impact)
 # Large AIC difference indicates strong evidence favoring the model with lowest AIC.
 # AIC is especially useful for comparing non-nested parametric survival models on the same dataset.
 # Note: AIC can be sensitive to high censoring; interpret with caution if censoring is large.
-
-
-# OLD NOTES:
-
-# Battery: Weibull fits better than exponential (AIC = 12771.94 < 13487.43).
-# IR sensor: Exponential slightly better in terms of AIC (6229.1 < 6230.7).
-# Impact sensor: Weibull is unstable; exponential should be used.
 
 # Other Takeaways:
 # Non-convergence in Weibull for impact sensor suggests insufficient failure events (models require enough events for stable estimation)
@@ -206,8 +168,10 @@ cat("Shape (k):", round(k_battery, 3), "\n")
 if (k_battery > 1) {
   cat("  → Increasing hazard (wear-out)\n")
 } else if (k_battery < 1) {
+  cat("  → Decreasing hazard (infant mortality)\n")
   cat("Decreasing hazard (infant mortality)\n")
 } else {
+  cat("  → Constant hazard\n")
   cat("Constant hazard\n")
 }
 
@@ -224,8 +188,10 @@ for (i in 2:(nrow(coef_summary)-1)) {
     cat(sprintf("    → Each additional hour of usage changes survival time by %.2f%%\n",
                 (exp(coef) - 1) * 100))
   } else if (coef > 0) {
+    cat(sprintf("    → Increases survival time by %.1f%%\n", (exp(coef) - 1) * 100))
     cat(sprintf("Increases survival time by %.1f%%\n", (exp(coef) - 1) * 100))
   } else {
+    cat(sprintf("    → Decreases survival time by %.1f%%\n", (1 - exp(coef)) * 100))
     cat(sprintf("Decreases survival time by %.1f%%\n", (1 - exp(coef)) * 100))
   }
 }
@@ -436,6 +402,10 @@ analyze_residuals_detailed <- function(model, data, event_col, time_col, comp_na
   cat("─────────────────────────────────────────────────\n")
   cat("2. MARTINGALE-LIKE RESIDUALS\n")
   cat("─────────────────────────────────────────────────\n")
+  cat("Definition: r_M = δ - H(t)\n")
+  cat("  where δ = event indicator (1=failed, 0=censored)\n")
+  cat("        H(t) = cumulative hazard (Cox-Snell residual)\n")
+  cat("Range: (-∞, 1]\n")
   cat("Range: (-inf, 1]\n")
   cat("Failed observations: approach 1\n")
   cat("Censored observations: negative values\n")
@@ -777,6 +747,7 @@ if (L10_ir >= 2000) {
   cat("   Falls short by", round(2000 - L10_ir, 1), "days\n")
   cat("   Performance ratio:", round(L10_ir / 2000 * 100, 1), "% of guarantee\n\n")
 }
+
 
 # ---- BATTERY ----
 cat("─────────────────────────────────────────────────\n")
