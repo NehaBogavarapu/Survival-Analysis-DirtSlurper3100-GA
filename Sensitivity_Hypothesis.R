@@ -50,7 +50,7 @@ time_vacuum <- ifelse(event_vacuum == 1 & !is.na(failuredate),
 
 #-------------------------------------------------------------------------------#
 #Sensitivity of Components wrt to Extreme usage
-#Because extreme usage has an overall impact
+#Because extreme usage has an overall impact but less
 
 
 #data_sens <- data %>%
@@ -203,8 +203,6 @@ ggsurvplot(
 #----------------Hypothesis---------------------------#
 #For infrared sensor
 #One-sided test on the KM survival at time = 2000 using Greenwood variance.
-#H0=Claim of Manufacturer false (L10<2000 days)S(2000<0.90)
-#H1=Claim of manufacturer true(L10>=2000 days)ie. S(2000>=0.90)
 #H0=Claim of Manufacturer false (L10<=2000 days)S(2000<=0.90)
 #H1=Claim of manufacturer true(L10>2000 days)ie. S(2000>0.90)
 
@@ -260,7 +258,6 @@ res <- get_surv_at(kmh_battery2400, t0)
 S_hat <- res$S
 SE <- res$SE
 
-# Z-test (one-sided: H0: S < 0.9 vs H1: S >= 0.9)
 z <- (S_hat - 0.90) / SE
 p_value_one_sided <- 1-pnorm(z) 
 
@@ -272,8 +269,6 @@ list(t = t0, S_hat = S_hat, SE = SE, z = z, p_one_sided = p_value_one_sided)
 
 #--------------------Claim of Impact Sensor-------------------#
 #No claim just check
-#H0: Claim that S(1000) < 0.9 
-#H1: Claim that S(1000) >=0.9 
 #H0: Claim that S(2000) <= 0.9 
 #H1: Claim that S(2000) >0.9 
 kmh_impactsensor <- survfit(Surv(time_impactsensor, event_impactsensor) ~ 1, data = data)
