@@ -1,5 +1,5 @@
 # Survival-Analysis-DirtSlurper3100-GA
-Code repo for the Survival Analysis DirtSlurper3100 Group Assignment.
+
 The DirtSlurper3100 is a robotic vacuum
 cleaner equipped with multiple sensors and a
 rechargeable battery system. Reliability is a
